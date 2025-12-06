@@ -1,0 +1,14 @@
+# Node
+node_modules/
+
+# Environment files
+.env
+server/.env
+client/.env
+
+# Logs
+*.log
+
+# Vite / React build outputs
+dist/
+build/
