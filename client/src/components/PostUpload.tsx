@@ -25,7 +25,7 @@ function PostUpload({image, setImage}: PostUploadProps) {
 
     return (
         <div className="w-full flex flex-col items-center rounded-lg">
-            <div>Music uploader</div>
+            
             {!image ? (
                 <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 bg-gray-100 rounded-md border border-default-strong border-gray-300 rounded-base cursor-pointer hover:bg-neutral-tertiary-medium">
                     <>
