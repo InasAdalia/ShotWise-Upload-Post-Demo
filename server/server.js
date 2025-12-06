@@ -1,12 +1,20 @@
 // File: server/server.js
-import axios from "axios";
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
+// import axios from "axios";
+// import express from "express";
+// import dotenv from "dotenv";
+// import cors from "cors";
 
-dotenv.config();
 
+
+const axios = require('axios');
+const express = require('express');
 const app = express();
+
+const dotenv = require('dotenv');
+const cors = require('cors');
+const spotifyPreviewFinder = require('spotify-preview-finder');
+dotenv.config();
+// const spotifyPreviewFinder = await import('spotify-preview-finder').then(mod => mod.default);
 
 // CORS setup
 const corsOptions = {
@@ -39,6 +47,8 @@ app.get("/music/preview-tracks", async (req, res) => {
       }
     );
 
+    
+
     // This will Filter only songs with preview links
     //apparently doesnt work cz spotify has removed ALL preview thanks might as well just remove the whole api
     // const filtered = response.data.tracks.items.filter(
@@ -70,6 +80,23 @@ app.get("/music/test-song", async (req, res) => {
   }
 });
 
+app.get("/music/search", async (req, res)=>{
+    try {
+        // const {title, artist, limit} = req.query;
+
+        // if (!q) return res.status(400).json({ error: 'Query parameter "q" required' });
+
+        // Search by song name only (limit is optional, default is 5)
+        const result = await spotifyPreviewFinder('Shape of You', 1);
+    
+        if (result.success) {
+            res.json(result);
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+})
+
 
 
 // FUNCTION: get Spotify token
@@ -92,3 +119,23 @@ async function getSpotifyToken() {
 
   return response.data.access_token;
 }
+
+//try luck
+app.get('/music/proxy-preview', async (req, res) => {
+  try {
+    const { url } = req.query;
+    if (!url) return res.status(400).send("URL required");
+
+    const response = await axios.get(url, {
+      responseType: 'arraybuffer'
+    });
+    
+    res.setHeader('Content-Type', 'audio/mpeg');
+    res.send(response.data);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+app.listen(8080, () => console.log('Server running'));
+

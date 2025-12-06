@@ -7,8 +7,9 @@ function AudioUpload() {
     const [res, setRes] = useState<string[]|''>('');
 
     useEffect(() => {
-        playSong();
-        fetchSomeSongs();
+        // playSong();
+        fetchSong();
+        // fetchSomeSongs();
     },[])
 
     const fetchSomeSongs = async () => {
@@ -18,20 +19,18 @@ function AudioUpload() {
     }
 
     const fetchSong = async () => {
-        const response = await axios.get("http://localhost:8080/music/drivers-license");
-        console.log(response.data);
+
+        const title = 'Shape of You';
+        const artist = 'Ed Sheeran';
+        const limit = 1;
+        const response = await axios.get(`http://localhost:8080/music/search`);
+        console.log(response.data.results[0]);
+        setRes(response.data.results[0].previewUrls[0]);
     };
 
     const playSong = async () => {
-    const res = await axios.get("http://localhost:8080/music/drivers-license");
-    const preview = res.data.preview_url;
-
-    if (!preview) {
-        console.log("No preview available");
-        return;
-    }
-
-    const audio = new Audio(preview);
+        if (!res) return;
+        const audio = new Audio(`http://localhost:8080/music/proxy-preview?url=${encodeURIComponent(res[0])}`);
         audio.play();
     };
 
@@ -52,7 +51,7 @@ function AudioUpload() {
 
                 {/* PLAY ICON */}
                 <span
-                    onClick={()=>{console.log(res)}} 
+                    onClick={()=>{playSong()}} 
                     className="clear-left rounded-full bg-[#eff0f9] h-10 w-10 cursor-pointer flex items-center justify-center group">
                 <span className="bg-white h-6 w-6 rounded-full shadow-md flex items-center justify-center group-hover:bg-rose-600">
                     <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-white group-hover:stroke-white" width="10" height="10" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#7e9cff" fill="#7e9cff" strokeLinecap="round" strokeLinejoin="round">
@@ -68,6 +67,8 @@ function AudioUpload() {
                     className="absolute right-[-1.5rem] cursor-pointer text-gray-500 hover:text-blue-600" 
                     
                     />
+
+                {/* <audio controls src={res[0]}></audio> */}
             </div>
         </div>
         {/* delete icon */}
