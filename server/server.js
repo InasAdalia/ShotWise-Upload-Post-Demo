@@ -4,8 +4,6 @@
 // import dotenv from "dotenv";
 // import cors from "cors";
 
-
-
 const axios = require('axios');
 const express = require('express');
 const app = express();
@@ -131,23 +129,6 @@ app.post('/music/bulk-search', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// app.post('/music/bulk-search', async (req, res) => {
-//   try {
-//     console.log('body:', req.body); // should be an array
-
-//     const list = req.body || [];
-//     const promises = list.map((item) =>
-//       spotifyPreviewFinder(item.title, item.artist, item)
-//     );
-
-//     const results = await Promise.all(promises);
-//     res.json(results);
-//   } catch (err) {
-//     console.error('bulk-search error:', err); // check your server console
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
 
 // Spotify: get ONE specific track
 app.get("/music/test-song", async (req, res) => {
@@ -167,6 +148,42 @@ app.get("/music/test-song", async (req, res) => {
   }
 });
 
+// =============== SENTISIGHT AI ====================
+const baseUrl = 'https://platform.sentisight.ai/api/'
+const token = process.env.SENTISIGHT_API_TOKEN
+const projectID = process.env.SENTISIGHT_PROJECT_ID
+const jsonHeaders = {
+  'Content-Type': 'application/json',
+  'X-Auth-token': token,
+};
+
+async function uploadImageByUrl(imageName, imageUrl, preprocess=true){
+    // curl --location --request POST "https://platform.sentisight.ai/api/image/$PROJECT_ID/$IMAGE_NAME?preprocess=$PREPROCESS" 
+    const res = await fetch(`${baseUrl}/image/${projectID}/${imageName}?preprocess=${preprocess}`, {
+        method: 'POST',
+        headers: jsonHeaders,
+        body: JSON.stringify({url: imageUrl})
+    })
+
+    if (res.ok) {
+        return res.json()
+    } else {
+        const errorMsg = await res.text()
+        throw new Error(`image upload to sentisight failed: ${res.statusText} ${errorMsg}`)
+    }
+}
+
+app.post("/image/upload", async (req, res) => {
+  try{
+    const { imageName, imageUrl } = req.body;
+    
+    const result = await uploadImageByUrl(imageName, imageUrl, true);
+    res.json(result);
+      // res.json({ 'message': `should be uploading well ${imageName} ${imageUrl}`});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+})
 
 
 
