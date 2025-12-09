@@ -9,6 +9,7 @@ interface PostUploadProps {
 
 function PostUpload({image, setImage}: PostUploadProps) {
 
+    const imageName='testupload'
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>)=>{
         const file = e.target.files?.[0];
@@ -21,8 +22,10 @@ function PostUpload({image, setImage}: PostUploadProps) {
         // Store inside state
         setImage(imageUrl);
 
-        uploadImage()
-        //TODO:
+        // uploadImage()
+        // console.log('encoded',encodeURI(imageName))
+        handleCancelUpload()
+        // TODO:
         //to prevent uploading duplicate images into sentisight
         // 1. by locally storing names and urls of uploaded images
         //when click share, save image to supabase. 
@@ -32,7 +35,7 @@ function PostUpload({image, setImage}: PostUploadProps) {
     }
 
     const uploadImage = async(url?: string)=>{
-        const imageName = 'test upload'
+        console.log('uploading..')
         const imageUrl = url || 'https://i.pinimg.com/736x/09/29/48/0929482167f227dcb17d834732079035.jpg';
         // call the api
         // const result = await axios.get('/image/upload', )
@@ -50,6 +53,14 @@ function PostUpload({image, setImage}: PostUploadProps) {
 
     const handleCancelUpload=async()=>{
         setImage(null);
+        try {
+            const result = await axios.post("http://localhost:8000/image/delete", {
+            imageName,   // must match server destructuring
+            });
+            console.log("DELETION: post to /image/delete result: ", result.data);
+        } catch (err) {
+            console.error("axios /image/delete error:", err);
+        }
         //call delete api
     }
 
@@ -91,7 +102,7 @@ function PostUpload({image, setImage}: PostUploadProps) {
                         width="25" 
                         className="text-gray-900 absolute top-0 right-0 cursor-pointer"
                         onClick={()=>{
-                            setImage(null);
+                            handleCancelUpload();
                         }} />
                 </>
             )

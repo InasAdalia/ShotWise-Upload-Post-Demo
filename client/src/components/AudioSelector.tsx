@@ -42,7 +42,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
             );
             // response.data is an array of spotifyPreviewFinder results
             setIsLoading(false)
-            console.log(response);
+            console.log(response.data);
             setSongUrls({selected: null, lists: response.data});
             
         } catch (error) {
@@ -123,7 +123,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
                         </p>
                     </SkeletonTheme>
                 )
-                :renderSongList()}
+                : renderSongList()}
             </div>
                 
         </div>

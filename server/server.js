@@ -157,33 +157,69 @@ const jsonHeaders = {
   'X-Auth-token': token,
 };
 
-async function uploadImageByUrl(imageName, imageUrl, preprocess=true){
-    // curl --location --request POST "https://platform.sentisight.ai/api/image/$PROJECT_ID/$IMAGE_NAME?preprocess=$PREPROCESS" 
-    const res = await fetch(`${baseUrl}/image/${projectID}/${imageName}?preprocess=${preprocess}`, {
+app.post("/image/upload", async (req, res) => {
+  try{
+    const { imageName, imageUrl } = req.body;
+    
+    const result = await fetch(`${baseUrl}/image/${projectID}/${imageName}?preprocess=${true}`, {
         method: 'POST',
         headers: jsonHeaders,
         body: JSON.stringify({url: imageUrl})
     })
 
-    if (res.ok) {
-        return res.json()
-    } else {
-        const errorMsg = await res.text()
-        throw new Error(`image upload to sentisight failed: ${res.statusText} ${errorMsg}`)
+    if (!result || !result.ok) {
+      const errorMsg = await result.text()
+      throw new Error(`image upload to sentisight failed: ${result.statusText} ${errorMsg}`)
     }
-}
-
-app.post("/image/upload", async (req, res) => {
-  try{
-    const { imageName, imageUrl } = req.body;
-    
-    const result = await uploadImageByUrl(imageName, imageUrl, true);
-    res.json(result);
-      // res.json({ 'message': `should be uploading well ${imageName} ${imageUrl}`});
+    return res.json()
+      // result.json({ 'message': `should be uploading well ${imageName} ${imageUrl}`});
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 })
+
+// File: server\server.js
+
+// File: server\server.js
+app.post('/image/delete', async (req, res) => {
+  try {
+    const { imageName } = req.body;
+
+    // ✅ Include Content-Type: text/plain as per Sentisight docs
+    const result = await fetch(`${baseUrl}image/${projectID}/fv`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'text/plain',
+        'X-Auth-token': token,
+      },
+    });
+    
+    console.log('Response status:', result.status);
+    console.log('Response statusText:', result.statusText);
+    
+    if (!result.ok) {
+      const errorMsg = await result.text();
+      console.error('Sentisight error response:', errorMsg);
+      throw new Error(`Image deletion from sentisight failed: ${result.status} ${result.statusText} - ${errorMsg}`);
+    }
+    
+    // Sentisight might return text or json, handle both
+    const contentType = result.headers.get('content-type');
+    let data;
+    if (contentType && contentType.includes('application/json')) {
+      data = await result.json();
+    } else {
+      data = await result.text();
+    }
+    
+    console.log('Delete successful, response:', data);
+    res.json({ message: 'Image deleted successfully', data });
+    
+  } catch (err) {
+    console.error('Delete error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 
 
