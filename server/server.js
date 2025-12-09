@@ -94,7 +94,7 @@ app.get('/music/proxy-preview', async (req, res) => {
 
 //Spotify: bulk fetch songs by titles
 app.post('/music/bulk-search', async (req, res) => {
-  try {
+  try { 
     const searches = req.body; // [{ title, artist, limit }, ...]
 
     const results = [];

@@ -2,6 +2,22 @@ import { Icon } from '@iconify/react'
 import axios from 'axios';
 import React, { use, useEffect } from 'react'
 import { songLists, type SongMeta } from '../data';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+
+
+export const matchAlbumCovers = (songTitle: string, index: number) : string =>{
+
+    const title = songLists.find(song =>
+        songTitle.toLowerCase().trim().includes(song.title.toLowerCase().trim())
+    );
+
+    if (!title) {
+        console.log("No match found for:", songTitle);
+        return `public/album-covers/random${index}.jpg`;
+    }
+
+    return `public/album-covers/${title.title.toLowerCase()}.jpg`;
+}
 
 interface AudioSelectorProps {
     songUrls: { selected: SongMeta | null, lists: SongMeta[]}
@@ -11,16 +27,27 @@ interface AudioSelectorProps {
 
 function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
 
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [curPlay, setCurPlay] = React.useState(0);
 
     const fetchAllSongs = async () => {
-        const response = await axios.post(
-            'http://localhost:8000/music/bulk-search',
-            songLists,
-            { headers: { 'Content-Type': 'application/json' } }
-        );
-        // response.data is an array of spotifyPreviewFinder results
-        console.log(response.data);
-        setSongUrls({selected: null, lists: response.data});
+        try {
+    
+            setIsLoading(true)
+            console.log('fetching');
+            const response = await axios.post(
+                'http://localhost:8000/music/bulk-search',
+                songLists,
+                { headers: { 'Content-Type': 'application/json' } }
+            );
+            // response.data is an array of spotifyPreviewFinder results
+            setIsLoading(false)
+            console.log(response);
+            setSongUrls({selected: null, lists: response.data});
+            
+        } catch (error) {
+            
+        }
         // store in state and pass into AudioSelector
     };
 
@@ -35,6 +62,8 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
         else fetchAllSongs();
     }, []);
 
+    useEffect(()=>{console.log(songUrls)}, [songUrls])
+
     const renderSongList= ()=>{
         if (!songUrls) return
 
@@ -47,13 +76,13 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
                 }}
                 className="bg-gray-100 h-auto flex gap-1 justify-start items-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl">
                 {/* ALBUM COVER */}
-                <img src="https://cdn-images.dzcdn.net/images/cover/68ea4f015ec09acb45930000906ae240/0x1900-000000-80-0-0.jpg" 
-                    alt="album cover" className="rounded-2xl h-8 " />
+                <img src={matchAlbumCovers(song.title, idx)} 
+                    className="rounded-2xl h-8 " />
 
                 {/* SONG TITLE */}
                  <div className="text-start text-xs font-semibold grow" title={song.title}>
-                    <p className="text-ellipsis whitespace-nowrap overflow-hidden max-w-[200px]">{song.artist}</p>
-                    <p className="text-xs font-normal text-ellipsis whitespace-nowrap overflow-hidden max-w-[200px]">{song.title}</p>
+                    <p className="text-ellipsis whitespace-nowrap overflow-hidden max-w-[200px]">{song.title}</p>
+                    <p className="text-xs font-normal text-ellipsis whitespace-nowrap overflow-hidden max-w-[200px]">{song.albumName}</p>
                 </div>
 
                 {/* PLAY ICON */}
@@ -86,8 +115,15 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
 
             <h2 className="text-sm text-start self-start align-auto font-semibold mb-4">Trending Songs</h2>
             {/* audio list */}
-            <div className="flex flex-col gap-2">
-                {renderSongList()}
+            <div className="flex flex-col gap-2 w-full">
+                {isLoading? (
+                    <SkeletonTheme baseColor="#202020" highlightColor="#444">
+                        <p>
+                        <Skeleton count={3} />
+                        </p>
+                    </SkeletonTheme>
+                )
+                :renderSongList()}
             </div>
                 
         </div>

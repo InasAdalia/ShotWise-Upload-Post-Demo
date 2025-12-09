@@ -25,7 +25,7 @@ function PostLayout() {
                 />
             </div>
 
-            <button className="bg-blue-900 text-white text-base px-4 py-1 rounded-xl shadow-lg align-self-end hover:bg-blue-800 transition-colors">
+            <button className="bg-blue-900 self-end text-white text-base px-4 py-1 rounded-xl shadow-lg align-self-end hover:bg-blue-800 transition-colors">
                 Share
             </button>
             

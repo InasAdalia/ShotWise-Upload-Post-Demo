@@ -1,7 +1,7 @@
 import { Icon } from '@iconify/react'
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
-import AudioSelector from './AudioSelector';
+import AudioSelector, { matchAlbumCovers } from './AudioSelector';
 import type { SongMeta } from '../data';
 
 function AudioUpload() {
@@ -20,8 +20,9 @@ function AudioUpload() {
         return hasSelected ? (
             <div
                 className="bg-gray-100 h-auto w-auto max-w-[60] flex gap-1 justify-start align-center items-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl">
+                
                 {/* ALBUM COVER */}
-                <img src="https://cdn-images.dzcdn.net/images/cover/68ea4f015ec09acb45930000906ae240/0x1900-000000-80-0-0.jpg" 
+                <img src={matchAlbumCovers(songUrls?.selected?.title ?? 'random1', 0)}
                     alt="album cover" className="rounded-2xl h-8 " />
 
                 {/* SONG TITLE */}
@@ -49,8 +50,6 @@ function AudioUpload() {
                     className="absolute right-[-1.5rem] cursor-pointer text-gray-500 hover:text-blue-600" 
                     onClick={()=>{setShowSelector(!showSelector)}}
                     />
-                
-                
             </div>
         ) : ( <div
                 onClick={()=>{setShowSelector(!showSelector)}} 
