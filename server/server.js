@@ -157,17 +157,8 @@ const imageEmbedder = require('./ImageEmbedder');
 // ============= UPLOAD & INDEX IMAGE =============
 app.post('/image/upload-and-index', async (req, res) => {
   try {
-    const { imageName, imageFile } = req.body;
-
-    console.log('Uploading and indexing:', imageName);
-
-    // 1. Store in Supabase
-    const supaRes = await axios.post('http://localhost:8000/supabase/store-image', {
-      imageName,
-      imageFile,
-    });
-
-    const supabaseUrl = supaRes;
+    const { imageName, imageUrl } = req.body;
+    //imageUrl must be a supabase public url
 
      // 1. Generate embedding for the image
     console.log('Step 1: Generating embedding...');
@@ -182,7 +173,7 @@ app.post('/image/upload-and-index', async (req, res) => {
         values: embedding,
         metadata: {
           imageName,
-          imageUrl: supabaseUrl,
+          imageUrl: imageUrl,
           uploadedAt: new Date().toISOString(),
         },
       },
@@ -198,6 +189,34 @@ app.post('/image/upload-and-index', async (req, res) => {
 
   } catch (error) {
     console.error('Upload error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============= GET ANY 10 IMAGE URLS =============
+app.get('/image/fetch-any', async (req, res) => {
+  try {
+    // Build a random vector with same dimension as your embeddings (e.g. 512)
+    const dim = 512; // set to the actual dimension of your CLIP model
+    const randomVector = Array.from({ length: dim }, () => Math.random());
+
+    const results = await index.namespace('default').query({
+      vector: randomVector,
+      topK: 10,
+      includeMetadata: true,
+      includeValues: false,
+    });
+
+    const images = results.matches.map((match) => ({
+      id: match.id,
+      imageName: match.metadata.imageName,
+      imageUrl: match.metadata.imageUrl,
+      score: match.score,
+    }));
+
+    res.json({ success: true, results: images });
+  } catch (error) {
+    console.error('Sample fetch error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -324,50 +343,10 @@ app.post('/image/bulk-upload-and-index', async (req, res) => {
 
 // -------------------- SUPABASE STUFF --------
 const { createClient } = require('@supabase/supabase-js');
-const supabaseUrl = 'https://xlpwosvjzyffqmiicqpf.supabase.co'
+const imageUrl = 'https://xlpwosvjzyffqmiicqpf.supabase.co'
 const supabaseKey = process.env.SUPABASE_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = createClient(imageUrl, supabaseKey)
 const BUCKET = 'gallery-images';
-
-app.post('/supabase/store-image', upload.single('imageFile'), async (req, res) => {
-  try {
-    const { imageName } = req.body;
-    const imageFile = req.file;
-
-    if (!imageName || !imageFile) {
-      return res.status(400).json({ error: 'imageName and imageFile are required' });
-    }
-
-    // ✅ Direct buffer upload - this works fine!
-    const { data, error } = await supabase.storage
-      .from(BUCKET)
-      .upload(imageName, imageFile.buffer, {
-        contentType: imageFile.mimetype,
-      });
-
-    if (error) {
-      console.error('Supabase upload error:', error);
-      throw new Error(`Upload failed: ${error.message}`);
-    }
-
-    const { data: publicUrlData } = supabase.storage
-      .from(BUCKET)
-      .getPublicUrl(imageName);
-
-    console.log('✅ Image uploaded:', publicUrlData.publicUrl);
-
-    res.json({
-      success: true,
-      message: 'Image stored in Supabase',
-      publicUrl: publicUrlData.publicUrl,
-      imageName,
-    });
-
-  } catch (error) {
-    console.error('❌ Error storing image:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
 
 app.post('/supabase/fetch', async (req, res) => {
     try {

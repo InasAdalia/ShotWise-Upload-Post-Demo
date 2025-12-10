@@ -3,9 +3,16 @@ import { Gallery } from './Gallery'
 import PostUpload from './PostUpload'
 import AudioUpload from './AudioUpload';
 
+export interface PostImage{
+    localUrl: string, 
+    storedUrl?: string, 
+    storedName?: string, 
+    imageFile: File
+}
+
 function PostLayout() {
 
-    const [image, setImage] = useState<{localUrl: string, storedUrl?: string, imageFile: File} | null>(null); //stores image urls
+    const [image, setImage] = useState<PostImage | null>(null); //stores image urls
     
     useEffect(()=>{
         console.log(image)

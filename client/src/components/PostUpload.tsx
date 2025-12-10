@@ -5,8 +5,8 @@ import { images } from '../data';
 import { createClient } from '@supabase/supabase-js';
 
 interface PostUploadProps {
-    image:  {localUrl: string, storedUrl?: string, imageFile: File} | null;
-    setImage: (image:  {localUrl: string, storedUrl?: string, imageFile: File} | null) => void;
+    image:  {localUrl: string, storedUrl?: string, storedName?: string, imageFile: File} | null;
+    setImage: (image:  {localUrl: string, storedUrl?: string, storedName?: string, imageFile: File} | null) => void;
 }
 
 function PostUpload({image, setImage}: PostUploadProps) {
@@ -15,74 +15,60 @@ function PostUpload({image, setImage}: PostUploadProps) {
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>)=>{
         
-        // if (storedImage) {
-        //     // Use the stored image URL
-        //     console.log('Using stored image URL');
-        //     setImage(storedImage);
-        //     return;
-        // }
+        const fileName = 'test'
         const file = e.target.files?.[0];
         if (!file) return;
 
         // Create a preview URL
         const imageUrl = URL.createObjectURL(file);
-        const imageFile = file;
-        localStorage.setItem('imageUrl', imageUrl);
-
-        // Store inside state
-        setImage({localUrl: imageUrl, imageFile: file});
-        // uploadImage(imageFile);
         supabaseUpload(file)
-        
+        // Store inside state
+        // uploadImage(imageFile);
+        const { publicUrl} = await supabaseUpload(file)
+        setImage({
+            localUrl: imageUrl,
+            storedName: fileName,
+            storedUrl: publicUrl, 
+            imageFile: file
+        });
+        // getSimilar(publicUrl);
+        console.log('Public URL:', publicUrl, fileName);
+        // uploadImage(fileName, publicUrl);        
         // console.log('post to /image/upload result: ', result);
     }
 
     const bulkUploadAndIndex = async () => {
         try {
-            console.log('Bulk uploading images...');
-            const result = await axios.post("http://localhost:8000/image/bulk-upload-and-index", {
-            images: images, // your array defined in the component
-            });
 
-            console.log('Bulk index result:', result.data);
-            setResults(result.data.images || []);
+            images.forEach((image, index) => {
+                // uploadImage(`image_${index}`, image);
+            })
         } catch (err) {
             console.error('Bulk upload error:', err);
     }
     };
 
 
-    const uploadImage = async (imageFile: File) => {
-        try {
-            console.log('Uploading and indexing image...');
+    // const uploadImage = async (imageName: string, imageUrl: string) => {
+    //     try {
+    //         console.log('Uploading and indexing image into Pinecone...');
             
-            // ✅ Use FormData to send file
-            const formData = new FormData();
-            formData.append('imageName', `image_${Date.now()}`);
-            formData.append('imageFile', imageFile);
+    //         const result = await axios.post(
+    //             "http://localhost:8000/image/upload-and-index",{
+    //             imageName,
+    //             imageUrl
+    //         });
             
-            const result = await axios.post(
-                "http://localhost:8000/supabase/store-image",
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
-            );
+    //         console.log('✅ Upload complete:', result.data);
+    //         console.log('Public URL:', result.data.publicUrl);
+            
+    //         return result.data;
+            
+    //     } catch (err) {
+    //         console.error("❌ Upload error:", err);
 
-            // const result = await axios.post('http://localhost:8000/supabase/fetch')
-            
-            console.log('✅ Upload complete:', result.data);
-            console.log('Public URL:', result.data.publicUrl);
-            
-            return result.data;
-            
-        } catch (err) {
-            console.error("❌ Upload error:", err);
-
-        }
-    };
+    //     }
+    // };
 
     const supabaseUpload= async(imageFile: File) => {
         const formData = new FormData();
@@ -98,26 +84,12 @@ function PostUpload({image, setImage}: PostUploadProps) {
             throw new Error(data?.error || "Upload failed");
         }
         console.log(data);
+
+        return { fileName: data.fileName, publicUrl: data.publicUrl };
     }
 
-    const getSimilar=async(imageUrl: string)=>{
-        try {
-            // const imageUrl = 'https://i.pinimg.com/736x/09/29/48/0929482167f227dcb17d834732079035.jpg';
-            console.log('Searching for similar images...');
-        
-            const result = await axios.post("http://localhost:8000/image/similarity-search", {
-                imageUrl: imageUrl,
-                topK: 10, // Return top 10 similar images
-            });
-        
-        console.log('Similar images:', result.data.results);
-        } catch (error) {
-            
-        }
-    }
-    
-    
 
+    
     const handleCancelUpload=async()=>{
         setImage(null);
         try {
@@ -172,20 +144,20 @@ function PostUpload({image, setImage}: PostUploadProps) {
                 </>
             )
             }
-            {/* <button
+            <button
             onClick={bulkUploadAndIndex}
             className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
             >
                 bulk upload & index all
-            </button> */}
+            </button>
             {/* <button
                 onClick={()=>uploadImage('')}
                 className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
             >upload image & index it</button> */}
-            <button
+            {/* <button
                 onClick={()=>getSimilar('')}
                 className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
-            >test similarity</button>
+            >test similarity</button> */}
         </div>
     )
 }
