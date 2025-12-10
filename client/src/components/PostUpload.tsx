@@ -9,9 +9,17 @@ interface PostUploadProps {
 
 function PostUpload({image, setImage}: PostUploadProps) {
 
-    const imageName='testupload'
+    const imageName='test'
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>)=>{
+        const storedImage = localStorage.getItem('imageUrl');
+        
+        // if (storedImage) {
+        //     // Use the stored image URL
+        //     console.log('Using stored image URL');
+        //     setImage(storedImage);
+        //     return;
+        // }
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -22,9 +30,7 @@ function PostUpload({image, setImage}: PostUploadProps) {
         // Store inside state
         setImage(imageUrl);
 
-        // uploadImage()
-        // console.log('encoded',encodeURI(imageName))
-        handleCancelUpload()
+        uploadImage()
         // TODO:
         //to prevent uploading duplicate images into sentisight
         // 1. by locally storing names and urls of uploaded images
@@ -36,7 +42,7 @@ function PostUpload({image, setImage}: PostUploadProps) {
 
     const uploadImage = async(url?: string)=>{
         console.log('uploading..')
-        const imageUrl = url || 'https://i.pinimg.com/736x/09/29/48/0929482167f227dcb17d834732079035.jpg';
+        const imageUrl = 'https://i.pinimg.com/736x/09/29/48/0929482167f227dcb17d834732079035.jpg';
         // call the api
         // const result = await axios.get('/image/upload', )
         console.log("imageUrl: ", imageUrl);
@@ -48,6 +54,26 @@ function PostUpload({image, setImage}: PostUploadProps) {
             console.log("post to /image/upload result: ", result.data);
         } catch (err) {
             console.error("axios /image/upload error:", err);
+        }
+    }
+
+    const getSimilar=async()=>{
+        try {
+
+            const imageUrl = 'https://i.pinimg.com/736x/09/29/48/0929482167f227dcb17d834732079035.jpg';
+            const result = await axios.post('/image/similarity-google',{
+                imageUrl: imageUrl
+            })
+            // const result = await axios.post("http://localhost:8000/image/similarity", {
+            //     imageName: "testupload",
+            //     labels: ["cat", "window"],
+            //     andOperator: true,    // must have BOTH labels
+            //     limit: 8,
+            //     threshold: 0.5        // only return results with >70% similarity
+            // });
+            console.log("post to /image/similarity result: ", result.data);
+        } catch (error) {
+            
         }
     }
 
@@ -106,8 +132,12 @@ function PostUpload({image, setImage}: PostUploadProps) {
                         }} />
                 </>
             )
-            
             }
+
+            <button
+                onClick={()=>getSimilar()}
+                className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
+            >test similarity</button>
         </div>
     )
 }

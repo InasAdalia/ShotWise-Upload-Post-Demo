@@ -171,8 +171,7 @@ app.post("/image/upload", async (req, res) => {
       const errorMsg = await result.text()
       throw new Error(`image upload to sentisight failed: ${result.statusText} ${errorMsg}`)
     }
-    return res.json()
-      // result.json({ 'message': `should be uploading well ${imageName} ${imageUrl}`});
+    return res.json({ 'message': `should be uploading well ${imageName} ${imageUrl}`});
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -222,6 +221,75 @@ app.post('/image/delete', async (req, res) => {
 });
 
 
+app.post('/image/similarity', async(req, res)=>{
+  try {
+
+     const { 
+      imageName, 
+      labels = [],           // optional: array of labels to filter by
+      andOperator = false,   // optional: use AND logic for labels (default OR)
+      limit = 8,           // optional: number of results to return
+      threshold = 0.5         // optional: minimum similarity score (0-1)
+    } = req.body;
+
+    // Build query string with optional parameters
+    let queryParams = `project=${projectID}`;
+    
+    // Add labels if provided
+    if (labels && labels.length > 0) {
+      labels.forEach(label => {
+        queryParams += `&labels=${encodeURIComponent(label)}`;
+      });
+      queryParams += `&and=${andOperator}`;
+    }
+    
+    // Add limit and threshold
+    queryParams += `&limit=${limit}`;
+    queryParams += `&threshold=${threshold}`;
+
+    const url = `${baseUrl}similarity?${queryParams}`;
+    console.log('Full URL:', url);
+
+    const result = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-Auth-token': token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ imageName })
+    });
+    res.json({ success: true, url, result:result });
+
+    if (!result.ok) {
+      const errorMsg = await result.text();
+      throw new Error(`Similarity search failed: ${result.status} ${result.statusText} - ${errorMsg}`);
+    }
+
+    const data = await result.json();
+    // res.json({ success: true, result: data });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+})
 
 
 
+app.post('/image/similarity-google', async (req, res) => {
+  try {
+    const { imageUrl } = req.body;
+    
+    const response = await fetch('https://google-reverse-image-api.vercel.app/reverse', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ imageUrl })
+    });
+
+    const data = await response.json();
+    res.json(data);
+    
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
