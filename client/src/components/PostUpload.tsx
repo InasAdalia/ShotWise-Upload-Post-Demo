@@ -1,6 +1,7 @@
 import { Icon } from '@iconify/react';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
+import { images } from '../data';
 
 interface PostUploadProps {
     image: string | null;
@@ -9,7 +10,7 @@ interface PostUploadProps {
 
 function PostUpload({image, setImage}: PostUploadProps) {
 
-    const imageName='test'
+    const [results, setResults] = useState([]);
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>)=>{
         const storedImage = localStorage.getItem('imageUrl');
@@ -29,8 +30,7 @@ function PostUpload({image, setImage}: PostUploadProps) {
 
         // Store inside state
         setImage(imageUrl);
-
-        uploadImage()
+        uploadImage(imageUrl);
         // TODO:
         //to prevent uploading duplicate images into sentisight
         // 1. by locally storing names and urls of uploaded images
@@ -40,50 +40,61 @@ function PostUpload({image, setImage}: PostUploadProps) {
         // console.log('post to /image/upload result: ', result);
     }
 
-    const uploadImage = async(url?: string)=>{
-        console.log('uploading..')
-        const imageUrl = 'https://i.pinimg.com/736x/09/29/48/0929482167f227dcb17d834732079035.jpg';
-        // call the api
-        // const result = await axios.get('/image/upload', )
-        console.log("imageUrl: ", imageUrl);
+    const bulkUploadAndIndex = async () => {
         try {
-            const result = await axios.post("http://localhost:8000/image/upload", {
-            imageName,
-            imageUrl,   // must match server destructuring
+            console.log('Bulk uploading images...');
+            const result = await axios.post("http://localhost:8000/image/bulk-upload-and-index", {
+            images: images, // your array defined in the component
             });
-            console.log("post to /image/upload result: ", result.data);
+
+            console.log('Bulk index result:', result.data);
+            setResults(result.data.images || []);
         } catch (err) {
-            console.error("axios /image/upload error:", err);
-        }
+            console.error('Bulk upload error:', err);
     }
+    };
+
+
+    const uploadImage = async (imageUrl: string) => {
+        try {
+            console.log('Uploading and indexing image...');
+            
+            const result = await axios.post("http://localhost:8000/image/upload-and-index", {
+                imageName: `image_${Date.now()}`, // Generate unique name
+                imageUrl: imageUrl, // Must be publicly accessible URL
+            });
+            
+            console.log('Image indexed:', result.data);
+            return result.data.imageName;
+            
+        } catch (err) {
+            console.error("Upload error:", err);
+        }
+    };
 
     const getSimilar=async()=>{
         try {
-
             const imageUrl = 'https://i.pinimg.com/736x/09/29/48/0929482167f227dcb17d834732079035.jpg';
-            const result = await axios.post('/image/similarity-google',{
-                imageUrl: imageUrl
-            })
-            // const result = await axios.post("http://localhost:8000/image/similarity", {
-            //     imageName: "testupload",
-            //     labels: ["cat", "window"],
-            //     andOperator: true,    // must have BOTH labels
-            //     limit: 8,
-            //     threshold: 0.5        // only return results with >70% similarity
-            // });
-            console.log("post to /image/similarity result: ", result.data);
+            console.log('Searching for similar images...');
+        
+            const result = await axios.post("http://localhost:8000/image/similarity-search", {
+                imageUrl: imageUrl,
+                topK: 10, // Return top 10 similar images
+            });
+        
+        console.log('Similar images:', result.data.results);
         } catch (error) {
             
         }
     }
+    
+    
 
     const handleCancelUpload=async()=>{
         setImage(null);
         try {
-            const result = await axios.post("http://localhost:8000/image/delete", {
-            imageName,   // must match server destructuring
-            });
-            console.log("DELETION: post to /image/delete result: ", result.data);
+            
+            console.log("DELETION: post to /image/delete result: ");
         } catch (err) {
             console.error("axios /image/delete error:", err);
         }
@@ -133,7 +144,16 @@ function PostUpload({image, setImage}: PostUploadProps) {
                 </>
             )
             }
-
+            <button
+            onClick={bulkUploadAndIndex}
+            className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
+            >
+                bulk upload & index all
+            </button>
+            {/* <button
+                onClick={()=>uploadImage(image ?? '')}
+                className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
+            >upload image & index it</button> */}
             <button
                 onClick={()=>getSimilar()}
                 className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'

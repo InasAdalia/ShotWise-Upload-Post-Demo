@@ -3,6 +3,8 @@
 // import express from "express";
 // import dotenv from "dotenv";
 // import cors from "cors";
+const { Pinecone: PineconeClient } = require('@pinecone-database/pinecone');
+
 
 const axios = require('axios');
 const express = require('express');
@@ -148,148 +150,226 @@ app.get("/music/test-song", async (req, res) => {
   }
 });
 
-// =============== SENTISIGHT AI ====================
-const baseUrl = 'https://platform.sentisight.ai/api/'
-const token = process.env.SENTISIGHT_API_TOKEN
-const projectID = process.env.SENTISIGHT_PROJECT_ID
-const jsonHeaders = {
-  'Content-Type': 'application/json',
-  'X-Auth-token': token,
-};
+// ------------- EMBEDDER UTILITY -------------
+// File: server\utils\imageEmbedder.js
+// File: server\utils\imageEmbedder.js
 
-app.post("/image/upload", async (req, res) => {
-  try{
-    const { imageName, imageUrl } = req.body;
-    
-    const result = await fetch(`${baseUrl}/image/${projectID}/${imageName}?preprocess=${true}`, {
-        method: 'POST',
-        headers: jsonHeaders,
-        body: JSON.stringify({url: imageUrl})
-    })
+const { pipeline, RawImage } = require('@xenova/transformers');
 
-    if (!result || !result.ok) {
-      const errorMsg = await result.text()
-      throw new Error(`image upload to sentisight failed: ${result.statusText} ${errorMsg}`)
-    }
-    return res.json({ 'message': `should be uploading well ${imageName} ${imageUrl}`});
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+class ImageEmbedder {
+  constructor() {
+    this.extractor = null;
   }
-})
 
-// File: server\server.js
+  async init() {
+    if (!this.extractor) {
+      console.log('Loading CLIP model...');
+      // Use 'image-feature-extraction' instead of 'feature-extraction'
+      this.extractor = await pipeline(
+        'image-feature-extraction',
+        'Xenova/clip-vit-base-patch32'
+      );
+      console.log('CLIP model loaded!');
+    }
+  }
 
-// File: server\server.js
-app.post('/image/delete', async (req, res) => {
+  async embedImage(imageUrl) {
+    await this.init();
+    
+    try {
+      console.log('Loading image from URL:', imageUrl);
+      
+      // Load the image using RawImage
+      const image = await RawImage.fromURL(imageUrl);
+      
+      console.log('Generating embedding...');
+      
+      // Generate embedding
+      const output = await this.extractor(image);
+      
+      // Extract the embedding array
+      const embedding = Array.from(output.data);
+      
+      console.log('Embedding generated, dimension:', embedding.length);
+      
+      return embedding;
+      
+    } catch (error) {
+      console.error('Error embedding image:', error);
+      throw new Error(`Failed to embed image: ${error.message}`);
+    }
+  }
+}
+
+// -------------- PINECONE --------------
+// File: server\utils\pineconeClient.js
+
+const { Pinecone } = require('@pinecone-database/pinecone');
+
+const pinecone = new Pinecone({
+  apiKey: process.env.PINECONE_API_KEY,
+});
+
+const indexName = process.env.PINECONE_INDEX_NAME || 'image-search';
+const index = pinecone.index(indexName);
+
+const imageEmbedder = new ImageEmbedder();
+
+// ============= UPLOAD & INDEX IMAGE =============
+app.post('/image/upload-and-index', async (req, res) => {
+  try {
+    const { imageName, imageUrl } = req.body;
+
+    console.log('Uploading and indexing:', imageName);
+
+     // 1. Generate embedding for the image
+    console.log('Step 1: Generating embedding...');
+    const embedding = await imageEmbedder.embedImage(imageUrl);
+    console.log('Embedding dimensions:', embedding.length);
+
+    // 2. Store in Pinecone with metadata
+    console.log('Step 2: Storing in Pinecone...');
+    await index.namespace('default').upsert([
+      {
+        id: imageName,
+        values: embedding,
+        metadata: {
+          imageName,
+          imageUrl,
+          uploadedAt: new Date().toISOString(),
+        },
+      },
+    ]);
+
+    console.log('✅ Image indexed successfully!');
+    res.json({
+      success: true,
+      message: 'Image uploaded and indexed',
+      imageName,
+      dimensions: embedding.length,
+    });
+
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============= SEARCH SIMILAR IMAGES =============
+app.post('/image/similarity-search', async (req, res) => {
+  try {
+    const { imageUrl, topK = 10 } = req.body;
+
+    console.log('Searching for similar images...');
+
+    // 1. Generate embedding for query image
+    const queryEmbedding = await imageEmbedder.embedImage(imageUrl);
+
+    // 2. Search Pinecone for similar vectors
+    const results = await index.namespace('default').query({
+      vector: queryEmbedding,
+      topK: topK,
+      includeMetadata: true,
+      includeValues: false,
+    });
+
+    // 3. Format results
+    const similarImages = results.matches.map((match) => ({
+      imageName: match.metadata.imageName,
+      imageUrl: match.metadata.imageUrl,
+      score: match.score, // Similarity score (0-1)
+    }));
+
+    console.log(`Found ${similarImages.length} similar images`);
+    res.json({
+      success: true,
+      results: similarImages,
+    });
+
+  } catch (error) {
+    console.error('Search error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============= DELETE IMAGE FROM INDEX =============
+app.post('/image/delete-from-index', async (req, res) => {
   try {
     const { imageName } = req.body;
 
-    // ✅ Include Content-Type: text/plain as per Sentisight docs
-    const result = await fetch(`${baseUrl}image/${projectID}/fv`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'text/plain',
-        'X-Auth-token': token,
-      },
+    await index.namespace('default').deleteOne(imageName);
+
+    console.log('Image deleted from index:', imageName);
+    res.json({
+      success: true,
+      message: 'Image deleted from index',
     });
-    
-    console.log('Response status:', result.status);
-    console.log('Response statusText:', result.statusText);
-    
-    if (!result.ok) {
-      const errorMsg = await result.text();
-      console.error('Sentisight error response:', errorMsg);
-      throw new Error(`Image deletion from sentisight failed: ${result.status} ${result.statusText} - ${errorMsg}`);
-    }
-    
-    // Sentisight might return text or json, handle both
-    const contentType = result.headers.get('content-type');
-    let data;
-    if (contentType && contentType.includes('application/json')) {
-      data = await result.json();
-    } else {
-      data = await result.text();
-    }
-    
-    console.log('Delete successful, response:', data);
-    res.json({ message: 'Image deleted successfully', data });
-    
-  } catch (err) {
-    console.error('Delete error:', err.message);
-    res.status(500).json({ error: err.message });
+
+  } catch (error) {
+    console.error('Delete error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============= LIST ALL INDEXED IMAGES =============
+app.get('/image/list-indexed', async (req, res) => {
+  try {
+    // Note: Pinecone doesn't have a built-in list all function
+    // You'd need to maintain a separate list or use namespaces
+    res.json({
+      message: 'To list images, query with a sample image or maintain a separate index',
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
 
-app.post('/image/similarity', async(req, res)=>{
+// ============= BULK UPLOAD & INDEX IMAGES =============
+app.post('/image/bulk-upload-and-index', async (req, res) => {
   try {
+    const { images } = req.body; // array of image URLs
 
-     const { 
-      imageName, 
-      labels = [],           // optional: array of labels to filter by
-      andOperator = false,   // optional: use AND logic for labels (default OR)
-      limit = 8,           // optional: number of results to return
-      threshold = 0.5         // optional: minimum similarity score (0-1)
-    } = req.body;
+    if (!Array.isArray(images) || images.length === 0) {
+      return res.status(400).json({ error: 'images must be a non-empty array' });
+    }
 
-    // Build query string with optional parameters
-    let queryParams = `project=${projectID}`;
-    
-    // Add labels if provided
-    if (labels && labels.length > 0) {
-      labels.forEach(label => {
-        queryParams += `&labels=${encodeURIComponent(label)}`;
+    console.log(`Bulk indexing ${images.length} images...`);
+
+    const vectors = [];
+
+    for (let i = 0; i < images.length; i++) {
+      const imageUrl = images[i];
+      const imageName = `image_${i}_${Date.now()}`;
+
+      console.log('Embedding:', imageUrl);
+      const embedding = await imageEmbedder.embedImage(imageUrl);
+
+      vectors.push({
+        id: imageName,
+        values: embedding,
+        metadata: {
+          imageName,
+          imageUrl,
+          uploadedAt: new Date().toISOString(),
+        },
       });
-      queryParams += `&and=${andOperator}`;
-    }
-    
-    // Add limit and threshold
-    queryParams += `&limit=${limit}`;
-    queryParams += `&threshold=${threshold}`;
-
-    const url = `${baseUrl}similarity?${queryParams}`;
-    console.log('Full URL:', url);
-
-    const result = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'X-Auth-token': token,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ imageName })
-    });
-    res.json({ success: true, url, result:result });
-
-    if (!result.ok) {
-      const errorMsg = await result.text();
-      throw new Error(`Similarity search failed: ${result.status} ${result.statusText} - ${errorMsg}`);
     }
 
-    const data = await result.json();
-    // res.json({ success: true, result: data });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-})
+    // Upsert all in one call (or chunk if very large)
+    await index.namespace('default').upsert(vectors);
 
-
-
-app.post('/image/similarity-google', async (req, res) => {
-  try {
-    const { imageUrl } = req.body;
-    
-    const response = await fetch('https://google-reverse-image-api.vercel.app/reverse', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ imageUrl })
+    console.log('Bulk upsert complete');
+    res.json({
+      success: true,
+      count: vectors.length,
+      images: vectors.map(v => ({
+        id: v.id,
+        imageUrl: v.metadata.imageUrl,
+      })),
     });
-
-    const data = await response.json();
-    res.json(data);
-    
   } catch (error) {
+    console.error('Bulk upload error:', error);
     res.status(500).json({ error: error.message });
   }
 });
