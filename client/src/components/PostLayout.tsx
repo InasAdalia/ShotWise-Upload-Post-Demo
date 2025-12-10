@@ -37,7 +37,7 @@ function PostLayout() {
             </button>
             
 
-            <Gallery />
+            { <Gallery similarityUrl={{imageName: image?.storedName ?? '', imageUrl: image?.storedUrl ?? ''}} />}
         </div>
     )
 }

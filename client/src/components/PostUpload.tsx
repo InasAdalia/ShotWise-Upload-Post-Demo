@@ -1,8 +1,5 @@
 import { Icon } from '@iconify/react';
-import axios from 'axios';
 import React, { useEffect, useState } from 'react'
-import { images } from '../data';
-import { createClient } from '@supabase/supabase-js';
 
 interface PostUploadProps {
     image:  {localUrl: string, storedUrl?: string, storedName?: string, imageFile: File} | null;
@@ -21,7 +18,6 @@ function PostUpload({image, setImage}: PostUploadProps) {
 
         // Create a preview URL
         const imageUrl = URL.createObjectURL(file);
-        supabaseUpload(file)
         // Store inside state
         // uploadImage(imageFile);
         const { publicUrl} = await supabaseUpload(file)
@@ -37,16 +33,7 @@ function PostUpload({image, setImage}: PostUploadProps) {
         // console.log('post to /image/upload result: ', result);
     }
 
-    const bulkUploadAndIndex = async () => {
-        try {
 
-            images.forEach((image, index) => {
-                // uploadImage(`image_${index}`, image);
-            })
-        } catch (err) {
-            console.error('Bulk upload error:', err);
-    }
-    };
 
 
     // const uploadImage = async (imageName: string, imageUrl: string) => {
@@ -144,12 +131,7 @@ function PostUpload({image, setImage}: PostUploadProps) {
                 </>
             )
             }
-            <button
-            onClick={bulkUploadAndIndex}
-            className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
-            >
-                bulk upload & index all
-            </button>
+            
             {/* <button
                 onClick={()=>uploadImage('')}
                 className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'

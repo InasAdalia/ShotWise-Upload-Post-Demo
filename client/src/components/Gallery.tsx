@@ -2,45 +2,57 @@ import { Icon } from '@iconify/react';
 import axios from 'axios';
 import type { PostImage } from './PostLayout';
 import { useEffect, useState } from 'react';
+import { imageDataset } from '../data';
 
 interface GalleryProps{
     similarityUrl?: {imageName: string, imageUrl: string}
-    onLoad: () => void
 }
-export function Gallery() {
+export function Gallery({similarityUrl}: GalleryProps) {
     
     const [images, setImages] = useState<PostImage[]>([]);
 
     useEffect(()=>{
-       fetchAny() 
+        fetchAny()
     },[])
 
-    useEffect(()=>{
+    useEffect(() => {
+        if (!similarityUrl?.imageUrl) return;
+        fetchSimilarImages(similarityUrl.imageUrl);
+    }, [similarityUrl?.imageUrl]);
 
-    },[images])
+    // const bulkUploadAndIndex = async () => {
+    //     try {
+
+    //         imageDataset.forEach((image, index) => {
+    //             uploadImage(`image_${index}`, image);
+    //         })
+    //     } catch (err) {
+    //         console.error('Bulk upload error:', err);
+    //     }   
+    // };
     
-    const uploadImage = async (imageName: string, imageUrl: string) => {
-        try {
-            console.log('Uploading and indexing image into Pinecone...');
+    // const uploadImage = async (imageName: string, imageUrl: string) => {
+    //     try {
+    //         console.log('Uploading and indexing image into Pinecone...');
             
-            const result = await axios.post(
-                "http://localhost:8000/image/upload-and-index",{
-                imageName,
-                imageUrl
-            });
+    //         const result = await axios.post(
+    //             "http://localhost:8000/image/upload-and-index",{
+    //             imageName,
+    //             imageUrl
+    //         });
             
-            console.log('✅ Upload complete:', result.data);
-            console.log('Public URL:', result.data.publicUrl);
+    //         console.log('✅ Upload complete:', result.data);
+    //         console.log('Public URL:', result.data.publicUrl);
             
-            return result.data;
+    //         return result.data;
             
-        } catch (err) {
-            console.error("❌ Upload error:", err);
+    //     } catch (err) {
+    //         console.error("❌ Upload error:", err);
 
-        }
-    };
+    //     }
+    // };
 
-    const getSimilar=async(imageUrl: string)=>{
+    const fetchSimilarImages=async(imageUrl: string)=>{
         try {
             console.log('Searching for similar images...');
         
@@ -48,17 +60,18 @@ export function Gallery() {
                 imageUrl: imageUrl,
                 topK: 10, // Return top 10 similar images
             });
+            const filtered = filterImages(result.data.results);
+            setImages(filtered);
         
-        console.log('Similar images:', result.data.results);
+            console.log('Similar images:', result.data.results);
+            return result.data.results;
         } catch (error) {
             
         }
     }
 
-    const fetchAny = async () => {
-    try {
-        const result = await axios.get("http://localhost:8000/image/fetch-any");
-        const urls = result.data.results;
+    //returns an array of object: { localUrl: ... }
+    const filterImages = (urls: Object[]) : PostImage[]=>{
 
         const set = new Set<string>();
 
@@ -69,42 +82,47 @@ export function Gallery() {
             return true;
         });
 
-        setImages(
-            unique.map((item: any) => ({
-                localUrl: item.imageUrl,
-            }))
-        );
-    } catch (error) {
-        console.error("Sample fetch error:", error);
+        return unique.map((item: any) => ({
+            localUrl: item.imageUrl,
+        })) as PostImage[]
     }
+
+    const fetchAny = async () => {
+        try {
+            const result = await axios.get("http://localhost:8000/image/fetch-any");
+            const filtered = filterImages(result.data.results);
+            setImages(filtered);
+            console.log("filtered", filtered);
+        } catch (error) {
+            console.error("Sample fetch error:", error);
+        }
     };
 
 
-const renderImages = () => {
-  if (!images || images.length === 0) {
-    return (
-      <>
-        <div className="grid gap-4" />
-        <div className="grid gap-4" />
-      </>
-    );
-  }
+    const renderImages = () => {
+        if (!images || images.length === 0) {
+            return (
+                <>
+                    loading
+                </>
+            );
+        }
 
-  const mid = Math.ceil(images.length / 2);
-  const left = images.slice(0, mid);
-  const right = images.slice(mid);
+        const mid = Math.ceil(images.length / 2);
+        const left = images.slice(0, mid);
+        const right = images.slice(mid);
 
-    const renderColumn = (col: typeof images) => (
+        const renderColumn = (col: typeof images) => (
             <div className="grid gap-4">
-            {col.map((image, index) => (
-                <div key={`${image.localUrl}-${index}`}>
-                <img
-                    className="h-auto max-w-full rounded-lg object-cover object-center"
-                    src={image.localUrl}
-                    alt="gallery-photo"
-                />
-                </div>
-            ))}
+                {col.map((image, index) => (
+                    <div key={`${image.localUrl}-${index}`}>
+                    <img
+                        className="h-auto max-w-full rounded-lg object-cover object-center"
+                        src={image.localUrl}
+                        alt="gallery-photo"
+                    />
+                    </div>
+                ))}
             </div>
         );
 
@@ -118,6 +136,12 @@ const renderImages = () => {
 
     return (
         <div className="w-full flex flex-col">
+            {/* <button
+            onClick={bulkUploadAndIndex}
+            className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
+            >
+                bulk upload & index all
+            </button> */}
             <div className="inline-flex items-center align-self-start gap-1 text-sm font-medium text-gray-900 mb-2"
             onClick={()=>{console.log('scroll down till full view of gallery')}}>
                 See more
