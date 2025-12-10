@@ -1,8 +1,4 @@
-// File: server/server.js
-// import axios from "axios";
-// import express from "express";
-// import dotenv from "dotenv";
-// import cors from "cors";
+
 const { Pinecone: PineconeClient } = require('@pinecone-database/pinecone');
 
 
@@ -15,6 +11,10 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const spotifyPreviewFinder = require('spotify-preview-finder');
 dotenv.config();
+
+
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 // const spotifyPreviewFinder = await import('spotify-preview-finder').then(mod => mod.default);
 
 // CORS setup
@@ -150,77 +150,24 @@ app.get("/music/test-song", async (req, res) => {
   }
 });
 
-// ------------- EMBEDDER UTILITY -------------
-// File: server\utils\imageEmbedder.js
-// File: server\utils\imageEmbedder.js
-
-const { pipeline, RawImage } = require('@xenova/transformers');
-
-class ImageEmbedder {
-  constructor() {
-    this.extractor = null;
-  }
-
-  async init() {
-    if (!this.extractor) {
-      console.log('Loading CLIP model...');
-      // Use 'image-feature-extraction' instead of 'feature-extraction'
-      this.extractor = await pipeline(
-        'image-feature-extraction',
-        'Xenova/clip-vit-base-patch32'
-      );
-      console.log('CLIP model loaded!');
-    }
-  }
-
-  async embedImage(imageUrl) {
-    await this.init();
-    
-    try {
-      console.log('Loading image from URL:', imageUrl);
-      
-      // Load the image using RawImage
-      const image = await RawImage.fromURL(imageUrl);
-      
-      console.log('Generating embedding...');
-      
-      // Generate embedding
-      const output = await this.extractor(image);
-      
-      // Extract the embedding array
-      const embedding = Array.from(output.data);
-      
-      console.log('Embedding generated, dimension:', embedding.length);
-      
-      return embedding;
-      
-    } catch (error) {
-      console.error('Error embedding image:', error);
-      throw new Error(`Failed to embed image: ${error.message}`);
-    }
-  }
-}
-
-// -------------- PINECONE --------------
-// File: server\utils\pineconeClient.js
-
-const { Pinecone } = require('@pinecone-database/pinecone');
-
-const pinecone = new Pinecone({
-  apiKey: process.env.PINECONE_API_KEY,
-});
-
-const indexName = process.env.PINECONE_INDEX_NAME || 'image-search';
-const index = pinecone.index(indexName);
-
-const imageEmbedder = new ImageEmbedder();
+//PINECONE STUFF
+const { index } = require('./Pinecone');
+const imageEmbedder = require('./ImageEmbedder');
 
 // ============= UPLOAD & INDEX IMAGE =============
 app.post('/image/upload-and-index', async (req, res) => {
   try {
-    const { imageName, imageUrl } = req.body;
+    const { imageName, imageFile } = req.body;
 
     console.log('Uploading and indexing:', imageName);
+
+    // 1. Store in Supabase
+    const supaRes = await axios.post('http://localhost:8000/supabase/store-image', {
+      imageName,
+      imageFile,
+    });
+
+    const supabaseUrl = supaRes;
 
      // 1. Generate embedding for the image
     console.log('Step 1: Generating embedding...');
@@ -235,7 +182,7 @@ app.post('/image/upload-and-index', async (req, res) => {
         values: embedding,
         metadata: {
           imageName,
-          imageUrl,
+          imageUrl: supabaseUrl,
           uploadedAt: new Date().toISOString(),
         },
       },
@@ -373,3 +320,64 @@ app.post('/image/bulk-upload-and-index', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+
+// -------------------- SUPABASE STUFF --------
+const { createClient } = require('@supabase/supabase-js');
+const supabaseUrl = 'https://xlpwosvjzyffqmiicqpf.supabase.co'
+const supabaseKey = process.env.SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
+const BUCKET = 'gallery-images';
+
+app.post('/supabase/store-image', upload.single('imageFile'), async (req, res) => {
+  try {
+    const { imageName } = req.body;
+    const imageFile = req.file;
+
+    if (!imageName || !imageFile) {
+      return res.status(400).json({ error: 'imageName and imageFile are required' });
+    }
+
+    // ✅ Direct buffer upload - this works fine!
+    const { data, error } = await supabase.storage
+      .from(BUCKET)
+      .upload(imageName, imageFile.buffer, {
+        contentType: imageFile.mimetype,
+      });
+
+    if (error) {
+      console.error('Supabase upload error:', error);
+      throw new Error(`Upload failed: ${error.message}`);
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET)
+      .getPublicUrl(imageName);
+
+    console.log('✅ Image uploaded:', publicUrlData.publicUrl);
+
+    res.json({
+      success: true,
+      message: 'Image stored in Supabase',
+      publicUrl: publicUrlData.publicUrl,
+      imageName,
+    });
+
+  } catch (error) {
+    console.error('❌ Error storing image:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/supabase/fetch', async (req, res) => {
+    try {
+      const { data } = supabase
+      .storage
+      .from(BUCKET)
+      .getPublicUrl('mine_2023.jpg')
+
+      res.json(data)
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+})

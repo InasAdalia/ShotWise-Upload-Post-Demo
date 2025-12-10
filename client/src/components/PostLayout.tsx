@@ -5,7 +5,7 @@ import AudioUpload from './AudioUpload';
 
 function PostLayout() {
 
-    const [image, setImage] = useState<string | null>(null); //stores image urls
+    const [image, setImage] = useState<{localUrl: string, storedUrl?: string, imageFile: File} | null>(null); //stores image urls
     
     useEffect(()=>{
         console.log(image)

@@ -2,10 +2,11 @@ import { Icon } from '@iconify/react';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { images } from '../data';
+import { createClient } from '@supabase/supabase-js';
 
 interface PostUploadProps {
-    image: string | null;
-    setImage: (image: string | null) => void;
+    image:  {localUrl: string, storedUrl?: string, imageFile: File} | null;
+    setImage: (image:  {localUrl: string, storedUrl?: string, imageFile: File} | null) => void;
 }
 
 function PostUpload({image, setImage}: PostUploadProps) {
@@ -13,7 +14,6 @@ function PostUpload({image, setImage}: PostUploadProps) {
     const [results, setResults] = useState([]);
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>)=>{
-        const storedImage = localStorage.getItem('imageUrl');
         
         // if (storedImage) {
         //     // Use the stored image URL
@@ -26,16 +26,13 @@ function PostUpload({image, setImage}: PostUploadProps) {
 
         // Create a preview URL
         const imageUrl = URL.createObjectURL(file);
+        const imageFile = file;
         localStorage.setItem('imageUrl', imageUrl);
 
         // Store inside state
-        setImage(imageUrl);
-        uploadImage(imageUrl);
-        // TODO:
-        //to prevent uploading duplicate images into sentisight
-        // 1. by locally storing names and urls of uploaded images
-        //when click share, save image to supabase. 
-
+        setImage({localUrl: imageUrl, imageFile: file});
+        // uploadImage(imageFile);
+        supabaseUpload(file)
         
         // console.log('post to /image/upload result: ', result);
     }
@@ -55,26 +52,57 @@ function PostUpload({image, setImage}: PostUploadProps) {
     };
 
 
-    const uploadImage = async (imageUrl: string) => {
+    const uploadImage = async (imageFile: File) => {
         try {
             console.log('Uploading and indexing image...');
             
-            const result = await axios.post("http://localhost:8000/image/upload-and-index", {
-                imageName: `image_${Date.now()}`, // Generate unique name
-                imageUrl: imageUrl, // Must be publicly accessible URL
-            });
+            // ✅ Use FormData to send file
+            const formData = new FormData();
+            formData.append('imageName', `image_${Date.now()}`);
+            formData.append('imageFile', imageFile);
             
-            console.log('Image indexed:', result.data);
-            return result.data.imageName;
+            const result = await axios.post(
+                "http://localhost:8000/supabase/store-image",
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            );
+
+            // const result = await axios.post('http://localhost:8000/supabase/fetch')
+            
+            console.log('✅ Upload complete:', result.data);
+            console.log('Public URL:', result.data.publicUrl);
+            
+            return result.data;
             
         } catch (err) {
-            console.error("Upload error:", err);
+            console.error("❌ Upload error:", err);
+
         }
     };
 
-    const getSimilar=async()=>{
+    const supabaseUpload= async(imageFile: File) => {
+        const formData = new FormData();
+            formData.append('imageName', `image_${Date.now()}`);
+            formData.append('file', imageFile);
+
+        const res = await fetch('https://xlpwosvjzyffqmiicqpf.supabase.co/functions/v1/upload-image', {
+            method: "POST",
+            body: formData
+        })
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data?.error || "Upload failed");
+        }
+        console.log(data);
+    }
+
+    const getSimilar=async(imageUrl: string)=>{
         try {
-            const imageUrl = 'https://i.pinimg.com/736x/09/29/48/0929482167f227dcb17d834732079035.jpg';
+            // const imageUrl = 'https://i.pinimg.com/736x/09/29/48/0929482167f227dcb17d834732079035.jpg';
             console.log('Searching for similar images...');
         
             const result = await axios.post("http://localhost:8000/image/similarity-search", {
@@ -129,7 +157,7 @@ function PostUpload({image, setImage}: PostUploadProps) {
                 <>
                     {/* display the img */}
                     <img 
-                        src={image} 
+                        src={image.localUrl} 
                         alt="uploaded-preview" 
                         className={`rounded-lg object-contain object-center max-h-[40vh] hover:opacity-50 `}
                     />
@@ -144,18 +172,18 @@ function PostUpload({image, setImage}: PostUploadProps) {
                 </>
             )
             }
-            <button
+            {/* <button
             onClick={bulkUploadAndIndex}
             className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
             >
                 bulk upload & index all
-            </button>
+            </button> */}
             {/* <button
-                onClick={()=>uploadImage(image ?? '')}
+                onClick={()=>uploadImage('')}
                 className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
             >upload image & index it</button> */}
             <button
-                onClick={()=>getSimilar()}
+                onClick={()=>getSimilar('')}
                 className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
             >test similarity</button>
         </div>
