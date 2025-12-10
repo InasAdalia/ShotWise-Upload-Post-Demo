@@ -5,6 +5,85 @@
   text-align: center;
 }
 
+.glassy-button{
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+
+  background: rgba(0, 0, 0, 0.001);
+  /* color: #1e1e1e; */
+  border-radius: 23px;
+  cursor: pointer;
+}
+
+.glassy-bg{
+  background: rgba(0, 0, 0, 0.001);
+}
+
+.glassy-button:hover{
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Rectangle 46 */
+
+
+.upload-img{
+  /* Thumb nail */
+filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.28));
+border-radius: 25px;
+}
+
+.glassy-box{
+
+}
+
+.normal-box{
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.upload-bg{
+  /* bg */
+  overflow: hidden;
+  position: absolute;
+  top:0;
+  width: inherit;
+  height: 80vh;
+
+
+  /* background-color: rgb(60, 60, 60); */
+  z-index: -2;
+  filter: blur(7px);
+
+}
+
+.gradient-bottom-back{
+  position: absolute;
+  bottom: 0;
+  width: inherit;
+  height: 100vh;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 20%, #FFFFFF 100%);
+}
+
+.gradient-bottom-front{
+  position: absolute;
+  bottom: 0;
+  width: inherit;
+  height: 100vh;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 90%, #FFFFFF 100%);
+}
+
+.gallery-images{
+  filter: drop-shadow(0px 60px 60px rgba(255, 255, 255, 0.784));
+}
+
+
+
 .logo {
   height: 6em;
   padding: 1.5em;

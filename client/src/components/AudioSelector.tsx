@@ -34,7 +34,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
         try {
     
             setIsLoading(true)
-            console.log('fetching');
+            console.log('fetching audios');
             const response = await axios.post(
                 'http://localhost:8000/music/bulk-search',
                 songLists,
@@ -58,8 +58,9 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
     };
 
     useEffect(() => {
-        if (songUrls.lists.length > 0) return
-        else fetchAllSongs();
+        // if (songUrls.lists.length > 0) return
+        // else 
+            fetchAllSongs();
     }, []);
 
     useEffect(()=>{console.log(songUrls)}, [songUrls])
@@ -76,7 +77,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
                 }}
                 className="bg-gray-100 h-auto flex gap-1 justify-start items-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl">
                 {/* ALBUM COVER */}
-                <img src={matchAlbumCovers(song.title, idx)} 
+                <img src={matchAlbumCovers(song?.title, idx)} 
                     className="rounded-2xl h-8 " />
 
                 {/* SONG TITLE */}

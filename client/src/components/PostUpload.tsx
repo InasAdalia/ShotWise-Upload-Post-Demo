@@ -94,10 +94,10 @@ function PostUpload({image, setImage}: PostUploadProps) {
     }, [image])
 
     return (
-        <div className={`w-full flex flex-col items-center rounded-lg ${image && 'relative hover: bg-black'}`}>
+        <div className={`upload-wrapper w-full flex flex-col items-center rounded-2xl   ${image && 'relative hover:bg-black'}`}>
             
             {!image ? (
-                <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 bg-gray-100 rounded-md border border-default-strong border-gray-300 rounded-base cursor-pointer hover:bg-neutral-tertiary-medium">
+                <label htmlFor="dropzone-file" className="background: rgba(0, 0, 0, 0.001); upload-img flex flex-col items-center justify-center w-full h-64 rounded-md border border-default-strong border-gray-300 rounded-base cursor-pointer hover:bg-neutral-tertiary-medium">
                     <>
                         <div className="flex flex-col items-center justify-center text-body pt-5 pb-6 mx-6">
                             <svg className="w-8 h-8 mb-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h3a3 3 0 0 0 0-6h-.025a5.56 5.56 0 0 0 .025-.5A5.5 5.5 0 0 0 7.207 9.021C7.137 9.017 7.071 9 7 9a4 4 0 1 0 0 8h2.167M12 19v-9m0 0-2 2m2-2 2 2"/></svg>
@@ -118,13 +118,14 @@ function PostUpload({image, setImage}: PostUploadProps) {
                     <img 
                         src={image.localUrl} 
                         alt="uploaded-preview" 
-                        className={`rounded-lg object-contain object-center max-h-[40vh] hover:opacity-50 `}
+                        className={`rounded-2xl object-contain object-center max-h-[40vh] hover:opacity-50 `}
                     />
                     <Icon   
                         icon="mdi:trash-can-outline" 
                         height="25" 
                         width="25" 
                         className="text-gray-900 absolute top-0 right-0 cursor-pointer"
+                        onMouseOver={(e)=>e.preventDefault()}
                         onClick={()=>{
                             handleCancelUpload();
                         }} />

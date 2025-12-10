@@ -19,7 +19,7 @@ function AudioUpload() {
     const renderSelectedSong = () => {
         return hasSelected ? (
             <div
-                className="bg-gray-100 h-auto w-auto max-w-[60] flex gap-1 justify-start align-center items-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl">
+                className="h-auto w-auto max-w-[60] flex gap-1 justify-start align-center items-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl">
                 
                 {/* ALBUM COVER */}
                 <img src={matchAlbumCovers(songUrls?.selected?.title ?? 'random1', 0)}
@@ -56,7 +56,7 @@ function AudioUpload() {
                 className="cursor-pointer bg-gray-100 hover:bg-gray-900 hover:text-white h-auto w-auto flex px-3 gap-3 justify-center items-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl">
                 <Icon 
                     icon="mdi:music" height="20" width="20" 
-                    className="text-gray-500" 
+                    className="text-black" 
                     />
                 <p className="text-ellipsis text-sm text-center self-center whitespace-nowrap overflow-hidden max-w-[200px]">Add Sound</p>
                 
@@ -67,7 +67,7 @@ function AudioUpload() {
 
   return (
     <>
-        <div className="flex justify-center items-center w-full ">
+        <div className="glassy-button flex justify-center items-center w-full ">
             {renderSelectedSong()}
             {showSelector && <AudioSelector onClose={()=>{setShowSelector(false)}} songUrls={songUrls ?? { selected: null, lists: [] }} setSongUrls={setSongUrls} />}
         </div>

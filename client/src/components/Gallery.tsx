@@ -117,7 +117,7 @@ export function Gallery({similarityUrl}: GalleryProps) {
                 {col.map((image, index) => (
                     <div key={`${image.localUrl}-${index}`}>
                     <img
-                        className="h-auto max-w-full rounded-lg object-cover object-center"
+                        className="h-auto max-w-full rounded-lg object-cover object-center gallery-images"
                         src={image.localUrl}
                         alt="gallery-photo"
                     />
@@ -135,7 +135,7 @@ export function Gallery({similarityUrl}: GalleryProps) {
     };
 
     return (
-        <div className="w-full flex flex-col">
+        <div className="w-full flex flex-col zIndex-10">
             {/* <button
             onClick={bulkUploadAndIndex}
             className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
