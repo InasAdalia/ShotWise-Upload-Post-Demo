@@ -5,6 +5,12 @@
   text-align: center;
 }
 
+.antic-didone-regular {
+  font-family: "Antic Didone", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
 .glassy-button{
   display: flex;
   flex-direction: row;
@@ -17,6 +23,41 @@
   /* color: #1e1e1e; */
   border-radius: 23px;
   cursor: pointer;
+}
+
+.glassy-medium{
+  /* 1. Set a semi-transparent background color (Figma Fill) */
+  background-color: rgba(255, 255, 255, 0.12); /* Example: 12% white opacity */
+
+  /* 2. Apply the backdrop blur (Figma Background blur) */
+  backdrop-filter: blur(10px); /* Adjust blur amount as in Figma (e.g., 10px-15px) */
+  -webkit-backdrop-filter: blur(10px); /* For Safari support */
+
+  /* 3. Add a subtle border (Figma Stroke) */
+  border: 1px solid rgba(255, 255, 255, 0.25); /* Example: 25% white opacity */
+
+  /* 4. Add a mild shadow (Figma Drop shadow) */
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1); /* Example shadow */
+
+  /* Optional: Round corners (Figma Corner radius) */
+  border-radius: 16px;
+
+}
+
+.glassy-medium.selected{
+  /* 1. Set a semi-transparent background color (Figma Fill) */
+  background-color: rgba(205, 229, 245, 0.12); /* Example: 12% white opacity */
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  /* 2. Apply the backdrop blur (Figma Background blur) */
+  backdrop-filter: blur(10px); /* Adjust blur amount as in Figma (e.g., 10px-15px) */
+  -webkit-backdrop-filter: blur(10px); /* For Safari support */
+  box-shadow: 0 6px 6px rgba(107, 119, 232, 0.068), 0 0 20px rgba(125, 125, 189, 0.634);
+
+  /* 3. Add a subtle border (Figma Stroke) */
+}
+
+.selected .song-title{
+  color: #301e4a;
 }
 
 .glassy-bg{

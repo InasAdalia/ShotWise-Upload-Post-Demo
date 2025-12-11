@@ -32,23 +32,45 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
 
     const fetchAllSongs = async () => {
         try {
-    
-            setIsLoading(true)
-            console.log('fetching audios');
-            const response = await axios.post(
-                'http://localhost:8000/music/bulk-search',
-                songLists,
-                { headers: { 'Content-Type': 'application/json' } }
-            );
-            // response.data is an array of spotifyPreviewFinder results
-            setIsLoading(false)
-            console.log(response.data);
-            setSongUrls({selected: null, lists: response.data});
-            
+            setIsLoading(true);
+
+            // Check localStorage first
+            const localState = localStorage.getItem('songUrlsState');
+                
+                if (localState) {
+                    // If cached data exists, use it
+                    const cachedData = JSON.parse(localState);
+                    console.log('Using cached song data from localStorage');
+                    setSongUrls(cachedData);
+                    setIsLoading(false);
+                    return; // Exit early, no need to fetch
+                }
+
+                // If no cache, fetch from API
+                console.log('Fetching songs from API');
+                const response = await axios.post(
+                    'http://localhost:8000/music/bulk-search',
+                    songLists,
+                    { headers: { 'Content-Type': 'application/json' } }
+                );
+                
+                setIsLoading(false);
+                console.log(response.data);
+                
+                const newSongUrls = {
+                    selected: songUrls.selected, // Preserve any existing selection
+                    lists: response.data
+                };
+                
+                setSongUrls(newSongUrls);
+                
+                // Save to localStorage
+                localStorage.setItem('songUrlsState', JSON.stringify(newSongUrls));
+                
         } catch (error) {
-            
+            console.error('Error fetching songs:', error);
+            setIsLoading(false);
         }
-        // store in state and pass into AudioSelector
     };
 
     const playSong = async (songUrl: string) => {
@@ -56,6 +78,12 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
         const audio = new Audio(`http://localhost:8000/music/proxy-preview?url=${encodeURIComponent(songUrl)}`);
         audio.play();
     };
+
+    const handleSelectSong = (song: SongMeta) => {
+        onClose();
+        setSongUrls({selected: song, lists: songUrls.lists});
+        localStorage.setItem('songUrlsState', JSON.stringify({selected: song, lists: songUrls.lists}));
+    }
     useEffect(() => {
             // Disable scroll
             const phoneWrapper = document.querySelector('.post-layout');
@@ -68,6 +96,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
                 phoneWrapper?.classList.add('overflow-y-auto');
             };
     }, []);
+
     useEffect(() => {
         fetchAllSongs(); 
     }, []);
@@ -84,31 +113,34 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
             <div
                 key={idx}
                 onClick={()=>{
-                    setSongUrls({selected: song, lists: songUrls.lists});
-                    onClose();
+                    handleSelectSong(song);
                 }}
-                className="bg-gray-100 h-auto flex gap-1 justify-start items-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl">
+                className={`${songUrls.selected?.title === song.title && 'selected'} cursor-pointer glassy-medium h-auto flex gap-1 items-center justify-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl`}>
                 {/* ALBUM COVER */}
                 <img src={matchAlbumCovers(song?.title, idx)} 
                     className="rounded-2xl h-8 " />
 
                 {/* SONG TITLE */}
-                 <div className="text-start text-xs font-semibold grow" title={song.title}>
+                 <div className={`song-title mx-4 text-start text-sm grow`} style={{fontFamily:'Antic Didone', fontWeight: 900}} title={song.title}>
                     <p className="text-ellipsis whitespace-nowrap overflow-hidden max-w-[200px]">{song.title}</p>
                     <p className="text-xs font-normal text-ellipsis whitespace-nowrap overflow-hidden max-w-[200px]">{song.albumName}</p>
                 </div>
 
                 {/* PLAY ICON */}
-                <span
-                    onClick={()=>{playSong(song.previewUrl ?? '')}} 
+                {songUrls.selected?.title === song.title? (
+                    <Icon 
+                        icon="mdi:trash-can-outline" height="18" width="18" 
+                        className="text-gray-500 hover:text-rose-600 mr-2 cursor-pointer" />
+                ) :<span
+                    onClick={(e)=>{e.stopPropagation(); playSong(song.previewUrl ?? '')}} 
                     className="clear-left rounded-full bg-[#eff0f9] h-10 w-10 cursor-pointer flex items-center justify-center group">
-                <span className="bg-white h-6 w-6 rounded-full shadow-md flex items-center justify-center group-hover:bg-rose-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-white group-hover:stroke-white" width="10" height="10" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#7e9cff" fill="#7e9cff" strokeLinecap="round" strokeLinejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M7 4v16l13 -8z" />
-                    </svg>
-                </span>
-                </span>
+                    <span className="bg-white h-6 w-6 rounded-full shadow-md flex items-center justify-center group-hover:bg-rose-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-white group-hover:stroke-white" width="10" height="10" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#7e9cff" fill="#7e9cff" strokeLinecap="round" strokeLinejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M7 4v16l13 -8z" />
+                        </svg>
+                    </span>
+                </span>}
             </div>
         ))
     }
@@ -120,13 +152,15 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
         
         {/* main component */}
         <div className="fixed h-[100%] top-50 left-0 right-0 z-50 flex justify-center">
-            <div className="w-full max-w-[375px] min-h-[420px] bg-gray-300 shadow-xl rounded-t-2xl p-4 max-h-[60vh] flex flex-col items-center overflow-y-auto scrollbar-hide">
+            <div className="w-full max-w-[375px] min-h-[430px] bg-gray-100 shadow-xl rounded-t-2xl px-4 py-2 max-h-[60vh] flex flex-col items-center overflow-y-auto scrollbar-hide">
                 {/* header */}
-                <div
-                    onClick={()=>{onClose()}} 
-                    className="w-[50%] mb-5 h-1 bg-gray-400 rounded-full align-self-center cursor-pointer"></div>
+                <Icon 
+                    icon={"mdi:chevron-down"} height="20" width="20" 
+                    onClick={onClose}
+                    className={'cursor-pointer'} 
+                    />
 
-                <h2 className="text-sm text-start self-start align-auto font-semibold mb-4">Trending Songs</h2>
+                <h2 className="text-sm text-start text-gray-600 self-start align-auto mb-4">Trending Songs</h2>
                 {/* audio list */}
                 <div className="flex flex-col gap-2 w-full">
                     {isLoading? (

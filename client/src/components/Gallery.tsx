@@ -142,7 +142,7 @@ export function Gallery({similarityUrl}: GalleryProps) {
             >
                 bulk upload & index all
             </button> */}
-            <div className="inline-flex items-center align-self-start gap-1 text-sm font-medium text-gray-900 mb-2"
+            <div className="inline-flex items-center align-self-start gap-1 text-sm font-medium text-gray-800 mb-2"
             onClick={()=>{console.log('scroll down till full view of gallery')}}>
                 See more
                 <Icon icon="mdi:arrow-down" height="16" width="16" />

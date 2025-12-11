@@ -4,9 +4,14 @@ import React, { useEffect, useState } from 'react'
 import AudioSelector, { matchAlbumCovers } from './AudioSelector';
 import type { SongMeta } from '../data';
 
-function AudioUpload() {
+interface AudioUploadProps {
+    enabled: boolean
+    songUrls: { selected: SongMeta | null, lists: SongMeta[]}
+    setSongUrls: (songUrls: { selected: SongMeta | null, lists: SongMeta[]}) => void
+}
 
-    const [songUrls, setSongUrls] = React.useState<{ selected: SongMeta | null, lists: SongMeta[]}>({selected: null, lists: []});
+function AudioUpload({songUrls, setSongUrls, enabled}: AudioUploadProps) {
+
     const [showSelector, setShowSelector] = useState(false);
     const hasSelected = songUrls?.selected !==null && songUrls?.selected.previewUrl !== null;
 
@@ -21,8 +26,8 @@ function AudioUpload() {
     const renderSelectedSong = () => {
         return hasSelected ? (
             <div
-                onClick={()=>setShowSelector(!showSelector)}
-                className="glassy-bg cursor-pointer hover:bg-grayhover:text-white h-[fit-content] w-auto max-w-60 flex gap-1 justify-center items-center px-2 py-1 relative max-h-40 shadow-lg rounded-xl">
+                onClick={()=>{setShowSelector(!showSelector)}}
+                className={`glassy-bg cursor-pointer hover:bg-grayhover:text-white h-[fit-content] w-auto max-w-50 flex gap-1 justify-center items-center px-2 py-1 relative max-h-40 shadow-lg rounded-xl`}>
                 
                 {/* ALBUM COVER */}
                 <img src={matchAlbumCovers(songUrls?.selected?.title ?? 'random1', 0)}
@@ -30,7 +35,7 @@ function AudioUpload() {
 
                 {/* SONG TITLE */}
                  <div className="text-start text-xs font-semibold grow" title={songUrls?.selected?.title}>
-                    <p className="text-xs font-normal text-ellipsis whitespace-nowrap overflow-hidden max-w-40"><span className="font-semibold">{songUrls?.selected?.artist}</span> - {songUrls?.selected?.title}</p>
+                    <p className="text-xs font-normal text-ellipsis whitespace-nowrap overflow-hidden max-w-30"><span className="font-semibold">{songUrls?.selected?.artist}</span> - {songUrls?.selected?.title}</p>
                 </div>
 
                 {/* PLAY ICON */}
@@ -54,8 +59,8 @@ function AudioUpload() {
                     /> */}
             </div>
         ) : ( <div
-                onClick={()=>{setShowSelector(!showSelector)}} 
-                className="glassy-bg cursor-pointer hover:bg-grayhover:text-white h-auto w-auto flex px-3 gap-3 justify-center items-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl">
+                onClick={()=>{enabled && setShowSelector(!showSelector)}} 
+                className={`glassy-bg ${enabled ? 'cursor-pointer' : 'cursor-default'} hover:bg-grayhover:text-white max-w-50  h-auto w-auto flex px-3 gap-3 justify-center items-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl`}>
                 <Icon 
                     icon="mdi:music" height="20" width="20" 
                     className="text-black" 
@@ -69,7 +74,7 @@ function AudioUpload() {
 
   return (
     <>
-        <div className="flex justify-center items-center w-full ">
+        <div className="flex justify-center items-center w-full">
             {renderSelectedSong()}
         </div>
         {showSelector && <AudioSelector onClose={()=>{setShowSelector(false)}} songUrls={songUrls ?? { selected: null, lists: [] }} setSongUrls={setSongUrls} />}

@@ -4,6 +4,7 @@ import PostUpload from './PostUpload'
 import AudioUpload from './AudioUpload';
 import { Icon } from '@iconify/react';
 import AudioSelector from './AudioSelector';
+import type { SongMeta } from '../data';
 
 export interface PostImage{
     localUrl: string, 
@@ -15,10 +16,11 @@ export interface PostImage{
 function PostLayout() {
 
     const [image, setImage] = useState<PostImage | null>(null); //stores image urls
-    
+    const [songUrls, setSongUrls] = useState<{ selected: SongMeta | null, lists: SongMeta[]}>({selected: null, lists: []}); // Add this
     useEffect(()=>{
         console.log(image)
     }, [image])
+
 
     return (
         <div className="post-layout space-y-4 w-[inherit] text-black flex flex-col max-h-[98vh] items-center overflow-y-auto scrollbar-hide">
@@ -40,9 +42,9 @@ function PostLayout() {
             <div className="px-2 flex flex-row justify-between align-center w-100 h-full relative">
                 <Icon icon="mdi:chevron-left" height="25" width="25" className="ml-2 text-gray-900" />
                 <div className="absolute left-1/2 transform -translate-x-1/2 z-2 w-full h-full">
-                    <AudioUpload />
+                    <AudioUpload enabled={image !== null} songUrls={songUrls} setSongUrls={setSongUrls} />
                 </div>
-                <button className="glassy-bg bg-blue-900 font-semibold text-blue-600 text-sm mr-2 px-4 py-1 rounded-xl shadow-lg align-self-end hover:bg-blue-800 transition-colors">
+                <button className="glassy-bg bg-blue-900font-semibold text-blue-600 text-sm mr-4 px-4 py-1 rounded-xl shadow-lg align-self-end cursor-pointer">
                     Post
                 </button>
             </div>
@@ -62,6 +64,7 @@ function PostLayout() {
 
                 {/* description input */}
                 <textarea
+                disabled={!image}
                 placeholder="Description"
                 className="normal-box text-gray-900 text-sm w-70 h-[100px] p-2 rounded-[15px] bg-gray-100 border border-gray-100 focus:outline-none focus:border-blue-200 resize-none"
                 ></textarea>
