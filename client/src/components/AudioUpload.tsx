@@ -13,12 +13,42 @@ interface AudioUploadProps {
 function AudioUpload({songUrls, setSongUrls, enabled}: AudioUploadProps) {
 
     const [showSelector, setShowSelector] = useState(false);
+    const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+
     const hasSelected = songUrls?.selected !==null && songUrls?.selected.previewUrl !== null;
 
     const playSong = async (songUrl: string) => {
         if (!songUrl) return;
         const audio = new Audio(`http://localhost:8000/music/proxy-preview?url=${encodeURIComponent(songUrl)}`);
         audio.play();
+    };
+
+    const togglePlay = async (songUrl: string) => {
+        if (!songUrl) return;
+
+        // if no audio yet, create one
+        if (!audio) {
+        const newAudio = new Audio(
+            `http://localhost:8000/music/proxy-preview?url=${encodeURIComponent(
+            songUrl
+            )}`
+        );
+        newAudio.addEventListener('ended', () => setIsPlaying(false));
+        setAudio(newAudio);
+        await newAudio.play();
+        setIsPlaying(true);
+        return;
+        }
+
+        // if already created, just play/pause
+        if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+        } else {
+        await audio.play();
+        setIsPlaying(true);
+        }
     };
 
     
@@ -31,7 +61,7 @@ function AudioUpload({songUrls, setSongUrls, enabled}: AudioUploadProps) {
                 
                 {/* ALBUM COVER */}
                 <img src={matchAlbumCovers(songUrls?.selected?.title ?? 'random1', 0)}
-                    alt="album cover" className="rounded-2xl h-6 " />
+                    alt="album cover" className={`rounded-2xl h-6 ${isPlaying ? 'animate-[spin_6s_linear_infinite]' : ''}`} />
 
                 {/* SONG TITLE */}
                  <div className="text-start text-xs font-semibold grow" title={songUrls?.selected?.title}>
@@ -40,13 +70,24 @@ function AudioUpload({songUrls, setSongUrls, enabled}: AudioUploadProps) {
 
                 {/* PLAY ICON */}
                 <span
-                    onClick={(e)=>{e.stopPropagation(); playSong(songUrls?.selected?.previewUrl ?? '')}} 
+                    onClick={(e)=>{e.stopPropagation(); togglePlay(songUrls?.selected?.previewUrl ?? '')}} 
                     className="clear-left rounded-full bg-[#eff0f9] h-6 w-6 cursor-pointer flex items-center justify-center group">
                     <span className="bg-white h-4 w-4 rounded-full shadow-md flex items-center justify-center group-hover:bg-rose-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-white group-hover:stroke-white" width="10" height="10" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#7e9cff" fill="#7e9cff" strokeLinecap="round" strokeLinejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                        <path d="M7 4v16l13 -8z" />
-                        </svg>
+                        {isPlaying ? (
+                            // Pause icon when playing
+                            <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-white group-hover:stroke-white" width="10" height="10" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#7e9cff" fill="#7e9cff" strokeLinecap="round" strokeLinejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <rect x="6" y="5" width="4" height="14" rx="1" />
+                                <rect x="14" y="5" width="4" height="14" rx="1" />
+                            </svg>
+                        ) : (
+                            // Play icon when not playing
+                            <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-white group-hover:stroke-white" width="10" height="10" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#7e9cff" fill="#7e9cff" strokeLinecap="round" strokeLinejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M7 4v16l13 -8z" />
+                            </svg>
+                        )}
+                        
                     </span>
                 </span>
 

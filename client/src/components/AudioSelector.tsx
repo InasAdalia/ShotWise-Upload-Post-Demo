@@ -28,7 +28,8 @@ interface AudioSelectorProps {
 function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
 
     const [isLoading, setIsLoading] = React.useState(false);
-    const [curPlay, setCurPlay] = React.useState(0);
+    const [currentAudio, setCurrentAudio] = React.useState<HTMLAudioElement | null>(null); // Add this
+    const [playingIndex, setPlayingIndex] = React.useState<number | null>(null); // Track which song is playing
 
     const fetchAllSongs = async () => {
         try {
@@ -73,17 +74,50 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
         }
     };
 
-    const playSong = async (songUrl: string) => {
+    const playSong = async (songUrl: string, index: number) => {
         if (!songUrl) return;
+        
+        // Stop previous audio if it exists
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+        }
+        
+        // If clicking the same song that's playing, stop it
+        if (playingIndex === index) {
+            setPlayingIndex(null);
+            setCurrentAudio(null);
+            return;
+        }
+        
+        // Create and play new audio
         const audio = new Audio(`http://localhost:8000/music/proxy-preview?url=${encodeURIComponent(songUrl)}`);
+        
+        // Add event listener for when song ends
+        audio.addEventListener('ended', () => {
+            setPlayingIndex(null);
+            setCurrentAudio(null);
+        });
+        
         audio.play();
+        setCurrentAudio(audio);
+        setPlayingIndex(index);
     };
 
+
     const handleSelectSong = (song: SongMeta) => {
+        // Stop any playing audio when selecting a song
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            setCurrentAudio(null);
+            setPlayingIndex(null);
+        }
         onClose();
         setSongUrls({selected: song, lists: songUrls.lists});
         localStorage.setItem('songUrlsState', JSON.stringify({selected: song, lists: songUrls.lists}));
     }
+
     useEffect(() => {
             // Disable scroll
             const phoneWrapper = document.querySelector('.post-layout');
@@ -101,9 +135,6 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
         fetchAllSongs(); 
     }, []);
 
-    //get height of screen
-    
-
     useEffect(()=>{console.log(songUrls)}, [songUrls])
 
     const renderSongList= ()=>{
@@ -118,7 +149,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
                 className={`${songUrls.selected?.title === song.title && 'selected'} cursor-pointer glassy-medium h-auto flex gap-1 items-center justify-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl`}>
                 {/* ALBUM COVER */}
                 <img src={matchAlbumCovers(song?.title, idx)} 
-                    className="rounded-2xl h-8 " />
+                    className={`rounded-2xl h-8 ${playingIndex === idx ? 'animate-[spin_6s_linear_infinite]' : ''}`} />
 
                 {/* SONG TITLE */}
                  <div className={`song-title mx-4 text-start text-sm grow`} style={{fontFamily:'Antic Didone', fontWeight: 900}} title={song.title}>
@@ -132,13 +163,23 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
                         icon="mdi:trash-can-outline" height="18" width="18" 
                         className="text-gray-500 hover:text-rose-600 mr-2 cursor-pointer" />
                 ) :<span
-                    onClick={(e)=>{e.stopPropagation(); playSong(song.previewUrl ?? '')}} 
+                    onClick={(e)=>{e.stopPropagation(); playSong(song.previewUrl ?? '', idx)}} 
                     className="clear-left rounded-full bg-[#eff0f9] h-10 w-10 cursor-pointer flex items-center justify-center group">
                     <span className="bg-white h-6 w-6 rounded-full shadow-md flex items-center justify-center group-hover:bg-rose-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-white group-hover:stroke-white" width="10" height="10" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#7e9cff" fill="#7e9cff" strokeLinecap="round" strokeLinejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                        <path d="M7 4v16l13 -8z" />
-                        </svg>
+                        {playingIndex === idx ? (
+                            // Pause icon when playing
+                            <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-white group-hover:stroke-white" width="10" height="10" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#7e9cff" fill="#7e9cff" strokeLinecap="round" strokeLinejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <rect x="6" y="5" width="4" height="14" rx="1" />
+                                <rect x="14" y="5" width="4" height="14" rx="1" />
+                            </svg>
+                        ) : (
+                            // Play icon when not playing
+                            <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-white group-hover:stroke-white" width="10" height="10" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#7e9cff" fill="#7e9cff" strokeLinecap="round" strokeLinejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M7 4v16l13 -8z" />
+                            </svg>
+                        )}
                     </span>
                 </span>}
             </div>

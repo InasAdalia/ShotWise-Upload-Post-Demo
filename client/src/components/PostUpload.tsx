@@ -8,8 +8,6 @@ interface PostUploadProps {
 
 function PostUpload({image, setImage}: PostUploadProps) {
 
-    const [results, setResults] = useState([]);
-
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>)=>{
         
         const fileName = 'test'
