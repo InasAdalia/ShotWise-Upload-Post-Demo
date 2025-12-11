@@ -1,5 +1,6 @@
 import { Icon } from '@iconify/react';
 import React, { useEffect, useState } from 'react'
+import { useLoading } from '../Context';
 
 interface PostUploadProps {
     image:  {localUrl: string, storedUrl?: string, storedName?: string, imageFile: File} | null;
@@ -8,52 +9,36 @@ interface PostUploadProps {
 
 function PostUpload({image, setImage}: PostUploadProps) {
 
+    const { isLoading, setIsLoading } = useLoading();
+
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>)=>{
         
-        const fileName = 'test'
-        const file = e.target.files?.[0];
-        if (!file) return;
+        try {
+            setIsLoading(true);
+            const fileName = 'test'
+            const file = e.target.files?.[0];
+            if (!file) return;
 
-        // Create a preview URL
-        const imageUrl = URL.createObjectURL(file);
-        // Store inside state
-        // uploadImage(imageFile);
-        const { publicUrl} = await supabaseUpload(file)
-        setImage({
-            localUrl: imageUrl,
-            storedName: fileName,
-            storedUrl: publicUrl, 
-            imageFile: file
-        });
-        // getSimilar(publicUrl);
-        console.log('Public URL:', publicUrl, fileName);
+            // Create a preview URL
+            const imageUrl = URL.createObjectURL(file);
+
+            const { publicUrl} = await supabaseUpload(file)
+            setImage({
+                localUrl: imageUrl,
+                storedName: fileName,
+                storedUrl: publicUrl, 
+                imageFile: file
+            });
+            console.log('Public URL:', publicUrl, fileName);
+            
+        } catch (error) {
+            
+        } finally{
+            setIsLoading(false);
+        }
         // uploadImage(fileName, publicUrl);        
         // console.log('post to /image/upload result: ', result);
     }
-
-
-
-
-    // const uploadImage = async (imageName: string, imageUrl: string) => {
-    //     try {
-    //         console.log('Uploading and indexing image into Pinecone...');
-            
-    //         const result = await axios.post(
-    //             "http://localhost:8000/image/upload-and-index",{
-    //             imageName,
-    //             imageUrl
-    //         });
-            
-    //         console.log('✅ Upload complete:', result.data);
-    //         console.log('Public URL:', result.data.publicUrl);
-            
-    //         return result.data;
-            
-    //     } catch (err) {
-    //         console.error("❌ Upload error:", err);
-
-    //     }
-    // };
 
     const supabaseUpload= async(imageFile: File) => {
         const formData = new FormData();
@@ -78,7 +63,6 @@ function PostUpload({image, setImage}: PostUploadProps) {
     const handleCancelUpload=async()=>{
         setImage(null);
         try {
-            
             console.log("DELETION: post to /image/delete result: ");
         } catch (err) {
             console.error("axios /image/delete error:", err);
@@ -92,9 +76,11 @@ function PostUpload({image, setImage}: PostUploadProps) {
     }, [image])
 
     return (
-        <div className={`upload-wrapper flex flex-col items-center rounded-2xl ${image && 'relative hover:bg-black'}`}>
+        <div className={`upload-wrapper flex flex-col items-center rounded-2xl ${image && 'relative hover:bg-black'} ${!image ? 'upload-shadow-animate' : ''} ${image && 'relative hover:bg-black'}`}>
             
-            {!image ? (
+            {!image ? 
+            
+                !isLoading ? (
                 <label htmlFor="dropzone-file" className="background: rgba(0, 0, 0, 0.001); upload-img flex flex-col items-center justify-center w-full h-64 rounded-md border border-default-strong border-gray-300 rounded-base cursor-pointer hover:bg-neutral-tertiary-medium">
                     <>
                         <div className="flex flex-col items-center justify-center text-body pt-5 pb-6 mx-6">
@@ -109,8 +95,10 @@ function PostUpload({image, setImage}: PostUploadProps) {
                             onChange={handleUpload} 
                         />
                     </>
-            </label>
-            ): (
+                </label>
+                ): (
+                 <div className="skeleton-box h-64 w-60 rounded-2xl"/>
+                ):(
                 <>
                     {/* display the img */}
                     <img 
@@ -118,12 +106,13 @@ function PostUpload({image, setImage}: PostUploadProps) {
                         alt="uploaded-preview" 
                         className={`rounded-2xl object-contain object-center max-h-[40vh] hover:opacity-50 `}
                     />
+                    
                     <Icon   
                         icon="mdi:trash-can-outline" 
-                        height="25" 
-                        width="25" 
-                        className="text-gray-900 absolute top-0 right-0 cursor-pointer"
-                        onMouseOver={(e)=>e.preventDefault()}
+                        height="20" 
+                        width="20" 
+                        className="text-gray-900 absolute top-2 right-2 cursor-pointer"
+                        onMouseOver={(e)=>{}}
                         onClick={()=>{
                             handleCancelUpload();
                         }} />

@@ -153,40 +153,44 @@
   filter: drop-shadow(0px 60px 60px rgb(255, 255, 255));
 }
 
-
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+@keyframes uploadShadowPulse {
+  0% {
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.025);
   }
-  to {
-    transform: rotate(360deg);
+  50% {
+    box-shadow: 0px 4px 8px rgba(59, 131, 246, 0.401); /* blue-ish */
+  }
+  100% {
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.049);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+.upload-shadow-animate {
+  animation: uploadShadowPulse 3s ease-in-out infinite;
+}
+
+/* App.css or a globals file */
+.skeleton-box {
+  border: 1px solid rgba(255, 255, 255, 0.25); /* Example: 25% white opacity */
+  backdrop-filter: blur(10px); /* Adjust blur amount as in Figma (e.g., 10px-15px) */
+  -webkit-backdrop-filter: blur(10px); /* For Safari support */
+  background: linear-gradient(135deg, #e5e7eb53, #dbeafe, #e5e7eb33);
+  background-size: 200% 200%;
+  animation: skeletonPulse 0.8s ease-in-out infinite;
+    /* outline shine */
+  &::after {
+    box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.964), inset -1px -1px 1px 1px rgb(255 255 255 / 50%);
   }
 }
 
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+@keyframes skeletonPulse {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }

@@ -115,7 +115,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
         }
         onClose();
         setSongUrls({selected: song, lists: songUrls.lists});
-        localStorage.setItem('songUrlsState', JSON.stringify({selected: song, lists: songUrls.lists}));
+        localStorage.setItem('songUrlsState', JSON.stringify({selected: null, lists: songUrls.lists}));
     }
 
     useEffect(() => {
@@ -192,7 +192,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
         <div className="fixed inset-x-0 -inset-y-20 z-40 h-[120vh] pointer-events-none" style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}></div>
         
         {/* main component */}
-        <div className="fixed h-[100%] top-50 left-0 right-0 z-50 flex justify-center">
+        <div className="fixed h-[100%] top-52 left-0 right-0 z-50 flex justify-center">
             <div className="w-full max-w-[375px] min-h-[430px] bg-gray-100 shadow-xl rounded-t-2xl px-4 py-2 max-h-[60vh] flex flex-col items-center overflow-y-auto scrollbar-hide">
                 {/* header */}
                 <Icon 

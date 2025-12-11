@@ -3,6 +3,8 @@ import axios from 'axios';
 import type { PostImage } from './PostLayout';
 import { useEffect, useState } from 'react';
 import { imageDataset } from '../data';
+import { useLoading } from '../Context';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 interface GalleryProps{
     similarityUrl?: {imageName: string, imageUrl: string}
@@ -10,13 +12,17 @@ interface GalleryProps{
 export function Gallery({similarityUrl}: GalleryProps) {
     
     const [images, setImages] = useState<PostImage[]>([]);
+    const { setIsLoading } = useLoading();
 
     useEffect(()=>{
         fetchAny()
     },[])
 
     useEffect(() => {
-        if (!similarityUrl?.imageUrl) return;
+        if (!similarityUrl?.imageUrl){
+            // fetchAny();
+            return;
+        } 
         fetchSimilarImages(similarityUrl.imageUrl);
     }, [similarityUrl?.imageUrl]);
 
@@ -54,6 +60,8 @@ export function Gallery({similarityUrl}: GalleryProps) {
 
     const fetchSimilarImages=async(imageUrl: string)=>{
         try {
+            setIsLoading(true);
+            setImages([]);
             console.log('Searching for similar images...');
         
             const result = await axios.post("http://localhost:8000/image/similarity-search", {
@@ -67,6 +75,8 @@ export function Gallery({similarityUrl}: GalleryProps) {
             return result.data.results;
         } catch (error) {
             
+        } finally{
+            setIsLoading(false);
         }
     }
 
@@ -89,50 +99,69 @@ export function Gallery({similarityUrl}: GalleryProps) {
 
     const fetchAny = async () => {
         try {
+            setIsLoading(true);
             const result = await axios.get("http://localhost:8000/image/fetch-any");
             const filtered = filterImages(result.data.results);
             setImages(filtered);
             console.log("filtered", filtered);
         } catch (error) {
             console.error("Sample fetch error:", error);
+        } finally{
+            setIsLoading(false);
         }
     };
-
 
     const renderImages = () => {
         if (!images || images.length === 0) {
             return (
-                <>
-                    loading
-                </>
-            );
-        }
-
-        const mid = Math.ceil(images.length / 2);
-        const left = images.slice(0, mid);
-        const right = images.slice(mid);
-
-        const renderColumn = (col: typeof images) => (
-            <div className="grid gap-4 h-[fit-content]">
-                {col.map((image, index) => (
-                    <div key={`${image.localUrl}-${index}`}>
-                    <img
-                        className="h-auto max-w-full rounded-base rounded-lg object-cover object-center gallery-images"
-                        src={image.localUrl}
-                        alt="gallery-photo"
-                    />
-                    </div>
-                ))}
-            </div>
-        );
-
-        return (
             <>
-            {renderColumn(left)}
-            {renderColumn(right)}
+                {renderSkeletonColumn()}
+                {renderSkeletonColumn()}
             </>
-        );
+            );
+    }
+
+    const mid = Math.ceil(images.length / 2);
+    const left = images.slice(0, mid);
+    const right = images.slice(mid);
+
+    const renderColumn = (col: typeof images) => (
+        <div className="grid gap-4 h-[fit-content]">
+        {col.map((image, index) => (
+            <div key={`${image.localUrl}-${index}`}>
+            <img
+                className="h-auto max-w-full rounded-lg object-cover object-center gallery-images"
+                src={image.localUrl}
+                alt="gallery-photo"
+            />
+            </div>
+        ))}
+        </div>
+    );
+
+    return (
+        <>
+        {renderColumn(left)}
+        {renderColumn(right)}
+        </>
+    );
     };
+
+    const renderSkeletonColumn = (items = 4) => (
+        <div className="grid gap-4 h-[fit-content]">
+            {Array.from({ length: items }).map((_, i) => {
+            const h = i % 2 === 0 ? 200 : 230; // 200px or 230px
+            return (
+                <div
+                key={i}
+                className="w-full rounded-lg skeleton-box"
+                style={{ height: `${h}px` }}
+                />
+            );
+            })}
+        </div>
+    );
+
 
     return (
         <div className="w-full flex flex-col zIndex-10 px-2">
@@ -148,7 +177,7 @@ export function Gallery({similarityUrl}: GalleryProps) {
                 <Icon icon="mdi:arrow-down" height="16" width="16" />
             </div>
             
-            <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 w-full">
                 {renderImages()}
             </div>
         </div>
