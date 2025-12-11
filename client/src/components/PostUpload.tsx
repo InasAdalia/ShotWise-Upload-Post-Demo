@@ -94,7 +94,7 @@ function PostUpload({image, setImage}: PostUploadProps) {
     }, [image])
 
     return (
-        <div className={`upload-wrapper w-full flex flex-col items-center rounded-2xl   ${image && 'relative hover:bg-black'}`}>
+        <div className={`upload-wrapper flex flex-col items-center rounded-2xl ${image && 'relative hover:bg-black'}`}>
             
             {!image ? (
                 <label htmlFor="dropzone-file" className="background: rgba(0, 0, 0, 0.001); upload-img flex flex-col items-center justify-center w-full h-64 rounded-md border border-default-strong border-gray-300 rounded-base cursor-pointer hover:bg-neutral-tertiary-medium">

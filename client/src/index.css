@@ -39,7 +39,7 @@ body {
   min-height: 100vh;
   justify-self: center;
   /* background-color: #f9f9f9; */
-  z-Index: -2;
+  /* z-Index: -2; */
 }
 body::-webkit-scrollbar {
   display: none;

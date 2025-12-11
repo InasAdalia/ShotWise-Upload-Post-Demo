@@ -6,7 +6,6 @@
 }
 
 .glassy-button{
-
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -21,7 +20,32 @@
 }
 
 .glassy-bg{
-  background: rgba(0, 0, 0, 0.001);
+  /* background: rgba(0, 0, 0, 0.001); */
+  /* background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3); */
+
+  border-radius: 16px;
+  isolation: isolate;
+  background-color: rgb(255 255 255 / 25%);
+  text-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+  box-shadow: 0 6px 6px rgb(0 0 0 / 20%), 0 0 20px rgb(0 0 0 / 10%);
+  text-align: center;
+  z-index:0;
+  
+  /* outline shine */
+  &::after {
+    box-shadow: inset 2px 2px 1px 0 rgb(255 255 255 / 50%), inset -1px -1px 1px 1px rgb(255 255 255 / 50%);
+  }
+    /* // Glass distortion effect */
+  &::before {
+    backdrop-filter: blur(3px);
+    filter: url(#glass-distortion);
+    z-index: 1;
+  }
 }
 
 .glassy-button:hover{
@@ -33,8 +57,14 @@
 
 .upload-img{
   /* Thumb nail */
-filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.28));
-border-radius: 25px;
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.28));
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .glassy-box{
@@ -79,7 +109,7 @@ border-radius: 25px;
 }
 
 .gallery-images{
-  filter: drop-shadow(0px 60px 60px rgba(255, 255, 255, 0.784));
+  filter: drop-shadow(0px 60px 60px rgb(255, 255, 255));
 }
 
 

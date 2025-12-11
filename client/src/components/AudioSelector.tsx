@@ -56,12 +56,24 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
         const audio = new Audio(`http://localhost:8000/music/proxy-preview?url=${encodeURIComponent(songUrl)}`);
         audio.play();
     };
-
     useEffect(() => {
-        // if (songUrls.lists.length > 0) return
-        // else 
-            fetchAllSongs();
+            // Disable scroll
+            const phoneWrapper = document.querySelector('.post-layout');
+            phoneWrapper?.classList.remove('overflow-y-auto');
+            phoneWrapper?.classList.add('overflow-hidden');
+            // document.body.style.overflow = 'hidden';
+            
+            // Cleanup: Re-enable scroll when modal closes
+            return () => {
+                phoneWrapper?.classList.add('overflow-y-auto');
+            };
     }, []);
+    useEffect(() => {
+        fetchAllSongs(); 
+    }, []);
+
+    //get height of screen
+    
 
     useEffect(()=>{console.log(songUrls)}, [songUrls])
 
@@ -104,30 +116,30 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
   return (
     <>  
         {/* background blurrer */}
-        <div className="fixed inset-0 z-40" style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}></div>
+        <div className="fixed inset-x-0 -inset-y-20 z-40 h-[120vh] pointer-events-none" style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}></div>
         
         {/* main component */}
-        <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center ">
-        <div className="w-full max-w-[375px] min-h-[420px] bg-gray-300 shadow-xl rounded-t-2xl p-4 max-h-[60vh] flex flex-col items-center overflow-y-auto scrollbar-hide">
-            {/* header */}
-            <div
-                onClick={()=>{onClose()}} 
-                className="w-[50%] mb-5 h-1 bg-gray-400 rounded-full align-self-center cursor-pointer"></div>
+        <div className="fixed h-[100%] top-50 left-0 right-0 z-50 flex justify-center">
+            <div className="w-full max-w-[375px] min-h-[420px] bg-gray-300 shadow-xl rounded-t-2xl p-4 max-h-[60vh] flex flex-col items-center overflow-y-auto scrollbar-hide">
+                {/* header */}
+                <div
+                    onClick={()=>{onClose()}} 
+                    className="w-[50%] mb-5 h-1 bg-gray-400 rounded-full align-self-center cursor-pointer"></div>
 
-            <h2 className="text-sm text-start self-start align-auto font-semibold mb-4">Trending Songs</h2>
-            {/* audio list */}
-            <div className="flex flex-col gap-2 w-full">
-                {isLoading? (
-                    <SkeletonTheme baseColor="#202020" highlightColor="#444">
-                        <p>
-                        <Skeleton count={3} />
-                        </p>
-                    </SkeletonTheme>
-                )
-                : renderSongList()}
+                <h2 className="text-sm text-start self-start align-auto font-semibold mb-4">Trending Songs</h2>
+                {/* audio list */}
+                <div className="flex flex-col gap-2 w-full">
+                    {isLoading? (
+                        <SkeletonTheme baseColor="#202020" highlightColor="#444">
+                            <p>
+                            <Skeleton count={3} />
+                            </p>
+                        </SkeletonTheme>
+                    )
+                    : renderSongList()}
+                </div>
+                    
             </div>
-                
-        </div>
         
         </div>
     </>

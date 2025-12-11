@@ -113,11 +113,11 @@ export function Gallery({similarityUrl}: GalleryProps) {
         const right = images.slice(mid);
 
         const renderColumn = (col: typeof images) => (
-            <div className="grid gap-4">
+            <div className="grid gap-4 h-[fit-content]">
                 {col.map((image, index) => (
                     <div key={`${image.localUrl}-${index}`}>
                     <img
-                        className="h-auto max-w-full rounded-lg object-cover object-center gallery-images"
+                        className="h-auto max-w-full rounded-base rounded-lg object-cover object-center gallery-images"
                         src={image.localUrl}
                         alt="gallery-photo"
                     />
@@ -135,7 +135,7 @@ export function Gallery({similarityUrl}: GalleryProps) {
     };
 
     return (
-        <div className="w-full flex flex-col zIndex-10">
+        <div className="w-full flex flex-col zIndex-10 px-2">
             {/* <button
             onClick={bulkUploadAndIndex}
             className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
@@ -148,7 +148,7 @@ export function Gallery({similarityUrl}: GalleryProps) {
                 <Icon icon="mdi:arrow-down" height="16" width="16" />
             </div>
             
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-2 w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 w-full">
                 {renderImages()}
             </div>
         </div>
