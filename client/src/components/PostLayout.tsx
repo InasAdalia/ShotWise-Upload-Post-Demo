@@ -69,7 +69,15 @@ function PostLayout() {
                 ></textarea>
             </div>
 
-            { <Gallery similarityUrl={{imageName: image?.storedName ?? '', imageUrl: image?.storedUrl ?? ''}} />}
+            { <Gallery 
+                similarityUrl={{imageName: image?.storedName ?? '', imageUrl: image?.storedUrl ?? ''}} 
+                header = {
+                    <div className="inline-flex items-center align-self-start gap-1 text-sm font-medium text-gray-800 mb-2">
+                        See more
+                        <Icon icon="mdi:arrow-down" height="16" width="16" />
+                    </div>
+                }
+                />}
         </div>
     )
 }

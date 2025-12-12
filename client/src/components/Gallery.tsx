@@ -6,8 +6,10 @@ import { useLoading } from '../Context';
 
 interface GalleryProps{
     similarityUrl?: {imageName: string, imageUrl: string}
+    header?: React.ReactNode
+    mainClass?: string
 }
-export function Gallery({similarityUrl}: GalleryProps) {
+export function Gallery({header, similarityUrl, mainClass}: GalleryProps) {
     
     const [images, setImages] = useState<PostImage[]>([]);
     const { setIsLoading } = useLoading();
@@ -23,38 +25,6 @@ export function Gallery({similarityUrl}: GalleryProps) {
         } 
         fetchSimilarImages(similarityUrl.imageUrl);
     }, [similarityUrl?.imageUrl]);
-
-    // const bulkUploadAndIndex = async () => {
-    //     try {
-
-    //         imageDataset.forEach((image, index) => {
-    //             uploadImage(`image_${index}`, image);
-    //         })
-    //     } catch (err) {
-    //         console.error('Bulk upload error:', err);
-    //     }   
-    // };
-    
-    // const uploadImage = async (imageName: string, imageUrl: string) => {
-    //     try {
-    //         console.log('Uploading and indexing image into Pinecone...');
-            
-    //         const result = await axios.post(
-    //             "http://localhost:8000/image/upload-and-index",{
-    //             imageName,
-    //             imageUrl
-    //         });
-            
-    //         console.log('✅ Upload complete:', result.data);
-    //         console.log('Public URL:', result.data.publicUrl);
-            
-    //         return result.data;
-            
-    //     } catch (err) {
-    //         console.error("❌ Upload error:", err);
-
-    //     }
-    // };
 
     const fetchSimilarImages=async(imageUrl: string)=>{
         try {
@@ -162,19 +132,16 @@ export function Gallery({similarityUrl}: GalleryProps) {
 
 
     return (
-        <div className="w-full flex flex-col zIndex-10 px-2">
+        <div className={`w-full h-[inherit] flex flex-col zIndex-10 ${mainClass}`}>
             {/* <button
             onClick={bulkUploadAndIndex}
             className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
             >
                 bulk upload & index all
             </button> */}
-            <div className="inline-flex items-center align-self-start gap-1 text-sm font-medium text-gray-800 mb-2">
-                See more
-                <Icon icon="mdi:arrow-down" height="16" width="16" />
-            </div>
+            {header}
             
-            <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 w-full p-2">
                 {renderImages()}
             </div>
         </div>

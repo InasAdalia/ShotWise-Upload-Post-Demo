@@ -1,8 +1,9 @@
 import axios from 'axios';
 import './App.css'
-import PostLayout from './components/PostLayout'
 import { LoadingProvider } from './Context'
 import { imageDataset } from './data';
+import {router} from './Router'
+import { RouterProvider } from 'react-router-dom';
 
 function App() {
 
@@ -36,12 +37,11 @@ function App() {
   };
   
   return (
-    <div className="phone-wrapper relative w-[375px] min-h-[95vh] h-[95vh] mx-auto overflow-y-auto scrollbar-hide rounded-[20px]">
-      <div className="absolute inset-0 bg-white -z-5 w-100 h-[100vh] " />
+    <div className="phone-wrapper relative w-[375px] min-h-[95vh] h-[95vh] overflow-hidden rounded-[20px]">
+      <div className="absolute inset-0 bg-white -z-5 w-[inherit] h-[100vh] " />
         <LoadingProvider>
-          <PostLayout />
+          <RouterProvider router={router} />
         </LoadingProvider>
-
         {/* For dev mode purposes. unhide button to bulk import imageDataset into Pinecone */}
         <button
         className="hidden bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
@@ -50,7 +50,7 @@ function App() {
             bulkUploadAndIndex();
         }}
         >bulk upload</button>
-  </div>
+    </div>
   )
 }
 

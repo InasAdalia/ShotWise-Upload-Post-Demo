@@ -36,7 +36,6 @@ function PostUpload({image, setImage}: PostUploadProps) {
         } finally{
             setIsLoading(false);
         }
-        // uploadImage(fileName, publicUrl);        
         // console.log('post to /image/upload result: ', result);
     }
 
@@ -49,16 +48,24 @@ function PostUpload({image, setImage}: PostUploadProps) {
             method: "POST",
             body: formData
         })
+
         const data = await res.json();
         if (!res.ok) {
             throw new Error(data?.error || "Upload failed");
         }
-        // console.log(data);
 
         return { fileName: data.fileName, publicUrl: data.publicUrl };
     }
 
+
+    
+    const handleCancelUpload=async()=>{
+        setImage(null);
+        //call delete api
+    }
+
     useEffect(()=>{
+        console.log('PostUpload component image:', image);
         // uploadImage();
     }, [image])
 
@@ -100,7 +107,9 @@ function PostUpload({image, setImage}: PostUploadProps) {
                         width="20" 
                         className="text-gray-900 absolute top-2 right-2 cursor-pointer"
                         onMouseOver={()=>{}}
-                        />
+                        onClick={()=>{
+                            handleCancelUpload();
+                        }} />
                 </>
             )}
         </div>
