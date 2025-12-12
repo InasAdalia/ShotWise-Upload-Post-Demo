@@ -1,6 +1,5 @@
 import { Icon } from '@iconify/react'
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import  {  useState } from 'react'
 import AudioSelector, { matchAlbumCovers } from './AudioSelector';
 import type { SongMeta } from '../data';
 
@@ -17,12 +16,6 @@ function AudioUpload({songUrls, setSongUrls, enabled}: AudioUploadProps) {
     const [isPlaying, setIsPlaying] = useState(false);
 
     const hasSelected = songUrls?.selected !==null && songUrls?.selected.previewUrl !== null;
-
-    const playSong = async (songUrl: string) => {
-        if (!songUrl) return;
-        const audio = new Audio(`http://localhost:8000/music/proxy-preview?url=${encodeURIComponent(songUrl)}`);
-        audio.play();
-    };
 
     const togglePlay = async (songUrl: string) => {
         if (!songUrl) return;

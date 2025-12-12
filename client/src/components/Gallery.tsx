@@ -2,9 +2,7 @@ import { Icon } from '@iconify/react';
 import axios from 'axios';
 import type { PostImage } from './PostLayout';
 import { useEffect, useState } from 'react';
-import { imageDataset } from '../data';
 import { useLoading } from '../Context';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 interface GalleryProps{
     similarityUrl?: {imageName: string, imageUrl: string}
@@ -71,7 +69,7 @@ export function Gallery({similarityUrl}: GalleryProps) {
             const filtered = filterImages(result.data.results);
             setImages(filtered);
         
-            console.log('Similar images:', result.data.results);
+            // console.log('Similar images:', result.data.results);
             return result.data.results;
         } catch (error) {
             
@@ -103,7 +101,7 @@ export function Gallery({similarityUrl}: GalleryProps) {
             const result = await axios.get("http://localhost:8000/image/fetch-any");
             const filtered = filterImages(result.data.results);
             setImages(filtered);
-            console.log("filtered", filtered);
+            // console.log("filtered", filtered);
         } catch (error) {
             console.error("Sample fetch error:", error);
         } finally{
@@ -171,8 +169,7 @@ export function Gallery({similarityUrl}: GalleryProps) {
             >
                 bulk upload & index all
             </button> */}
-            <div className="inline-flex items-center align-self-start gap-1 text-sm font-medium text-gray-800 mb-2"
-            onClick={()=>{console.log('scroll down till full view of gallery')}}>
+            <div className="inline-flex items-center align-self-start gap-1 text-sm font-medium text-gray-800 mb-2">
                 See more
                 <Icon icon="mdi:arrow-down" height="16" width="16" />
             </div>

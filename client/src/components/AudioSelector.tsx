@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react'
 import axios from 'axios';
-import React, { use, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { songLists, type SongMeta } from '../data';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
@@ -41,7 +41,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
                 if (localState) {
                     // If cached data exists, use it
                     const cachedData = JSON.parse(localState);
-                    console.log('Using cached song data from localStorage');
+                    // console.log('Using cached song data from localStorage');
                     setSongUrls(cachedData);
                     setIsLoading(false);
                     return; // Exit early, no need to fetch
@@ -56,7 +56,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
                 );
                 
                 setIsLoading(false);
-                console.log(response.data);
+                // console.log(response.data);
                 
                 const newSongUrls = {
                     selected: songUrls.selected, // Preserve any existing selection
@@ -134,8 +134,6 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
     useEffect(() => {
         fetchAllSongs(); 
     }, []);
-
-    useEffect(()=>{console.log(songUrls)}, [songUrls])
 
     const renderSongList= ()=>{
         if (!songUrls) return

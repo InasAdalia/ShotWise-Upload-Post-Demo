@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Gallery } from './Gallery'
 import PostUpload from './PostUpload'
 import AudioUpload from './AudioUpload';
 import { Icon } from '@iconify/react';
-import AudioSelector from './AudioSelector';
 import type { SongMeta } from '../data';
 
 export interface PostImage{
@@ -18,7 +17,7 @@ function PostLayout() {
     const [image, setImage] = useState<PostImage | null>(null); //stores image urls
     const [songUrls, setSongUrls] = useState<{ selected: SongMeta | null, lists: SongMeta[]}>({selected: null, lists: []}); // Add this
     useEffect(()=>{
-        console.log(image)
+        // console.log(image)
     }, [image])
 
 

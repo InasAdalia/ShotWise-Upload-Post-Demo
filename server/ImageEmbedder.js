@@ -1,5 +1,4 @@
 // File: server\utils\imageEmbedder.js
-
 const { pipeline, RawImage } = require('@xenova/transformers');
 
 class ImageEmbedder {
@@ -9,12 +8,10 @@ class ImageEmbedder {
 
   async init() {
     if (!this.extractor) {
-      console.log('Loading CLIP model...');
       this.extractor = await pipeline(
         'image-feature-extraction',
         'Xenova/clip-vit-base-patch32'
       );
-      console.log('CLIP model loaded!');
     }
   }
 

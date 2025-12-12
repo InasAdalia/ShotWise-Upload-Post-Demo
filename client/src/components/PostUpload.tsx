@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useLoading } from '../Context';
 
 interface PostUploadProps {
@@ -29,7 +29,7 @@ function PostUpload({image, setImage}: PostUploadProps) {
                 storedUrl: publicUrl, 
                 imageFile: file
             });
-            console.log('Public URL:', publicUrl, fileName);
+            // console.log('Public URL:', publicUrl, fileName);
             
         } catch (error) {
             
@@ -53,25 +53,12 @@ function PostUpload({image, setImage}: PostUploadProps) {
         if (!res.ok) {
             throw new Error(data?.error || "Upload failed");
         }
-        console.log(data);
+        // console.log(data);
 
         return { fileName: data.fileName, publicUrl: data.publicUrl };
     }
 
-
-    
-    const handleCancelUpload=async()=>{
-        setImage(null);
-        try {
-            console.log("DELETION: post to /image/delete result: ");
-        } catch (err) {
-            console.error("axios /image/delete error:", err);
-        }
-        //call delete api
-    }
-
     useEffect(()=>{
-        console.log('PostUpload component image:', image);
         // uploadImage();
     }, [image])
 
@@ -112,22 +99,10 @@ function PostUpload({image, setImage}: PostUploadProps) {
                         height="20" 
                         width="20" 
                         className="text-gray-900 absolute top-2 right-2 cursor-pointer"
-                        onMouseOver={(e)=>{}}
-                        onClick={()=>{
-                            handleCancelUpload();
-                        }} />
+                        onMouseOver={()=>{}}
+                        />
                 </>
-            )
-            }
-            
-            {/* <button
-                onClick={()=>uploadImage('')}
-                className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
-            >upload image & index it</button> */}
-            {/* <button
-                onClick={()=>getSimilar('')}
-                className='bg-gray-900 text-white cursor-pointer px-3 rounded-sm py-1 m-2'
-            >test similarity</button> */}
+            )}
         </div>
     )
 }
