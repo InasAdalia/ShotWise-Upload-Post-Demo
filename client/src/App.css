@@ -148,7 +148,7 @@
   bottom: 0;
   width: inherit;
   height: 100vh;
-  z-index: -1;
+  z-index: 0;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 90%, #FFFFFF 100%);
 }
 

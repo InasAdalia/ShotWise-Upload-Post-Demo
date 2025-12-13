@@ -7,7 +7,7 @@ function FeedLayout() {
         <img src={'/wallpaper1.jpg'} alt="post preview" className="upload-bg full-height w-full h-full object-contain object-center" />
         
         <Gallery
-            mainClass='overflow-y-auto scrollbar-hide'
+            mainClass='overflow-y-auto scrollbar-hide pb-10'
             header={
                 <div className="relative text-gray-100 px-2 bg-transparent flex flex-row justify-between items-center">
                     <input type="search" name="search" placeholder="Search" className="glassy-medium w-full h-10 px-5 pr-10 rounded-full text-sm focus:outline-none"/>

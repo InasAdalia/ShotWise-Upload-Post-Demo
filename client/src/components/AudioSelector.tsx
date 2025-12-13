@@ -42,7 +42,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
                     // If cached data exists, use it
                     const cachedData = JSON.parse(localState);
                     // console.log('Using cached song data from localStorage');
-                    setSongUrls(cachedData);
+                    setSongUrls({selected: songUrls.selected, lists: cachedData.lists});
                     setIsLoading(false);
                     return; // Exit early, no need to fetch
                 }
@@ -187,11 +187,11 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
   return (
     <>  
         {/* background blurrer */}
-        <div className="fixed inset-x-0 -inset-y-20 z-40 h-[120vh] pointer-events-none" style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}></div>
+        <div className="fixed inset-x-0 -inset-y-20 z-0 h-[120vh] pointer-events-none" style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}></div>
         
         {/* main component */}
-        <div className="fixed h-[100%] top-52 left-0 right-0 z-50 flex justify-center">
-            <div className="w-full max-w-[375px] min-h-[430px] bg-gray-100 shadow-xl rounded-t-2xl px-4 py-2 max-h-[60vh] flex flex-col items-center overflow-y-auto scrollbar-hide">
+        <div className="fixed h-[100%] top-52 left-0 right-0 flex justify-center">
+            <div className="w-full max-w-[375px] min-h-[430px] z-999 bg-gray-100 shadow-xl rounded-t-2xl px-4 py-2 max-h-[60vh] flex flex-col items-center overflow-y-auto scrollbar-hide">
                 {/* header */}
                 <Icon 
                     icon={"mdi:chevron-down"} height="20" width="20" 

@@ -1,4 +1,3 @@
-import { Icon } from '@iconify/react';
 import axios from 'axios';
 import type { PostImage } from './PostLayout';
 import { useEffect, useState } from 'react';

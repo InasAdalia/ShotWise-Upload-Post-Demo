@@ -4,6 +4,7 @@ import PostUpload from './PostUpload'
 import AudioUpload from './AudioUpload';
 import { Icon } from '@iconify/react';
 import type { SongMeta } from '../data';
+import { useNavigate } from 'react-router-dom';
 
 export interface PostImage{
     localUrl: string, 
@@ -20,6 +21,7 @@ function PostLayout() {
         // console.log(image)
     }, [image])
 
+    const navigate = useNavigate();
 
     return (
         <div className="post-layout space-y-4 w-[inherit] text-black flex flex-col max-h-[98vh] items-center overflow-y-auto scrollbar-hide">
@@ -31,7 +33,7 @@ function PostLayout() {
             
             
             {/* Page Header */}
-            <div className="w-full  flex items-center ">
+            <div className="w-full flex items-center ">
                 <h6 className="text-lg mt-1 text-gray-900 justify-center flex-grow">
                 Share post
                 </h6>
@@ -39,11 +41,14 @@ function PostLayout() {
 
             {/* Subheader */}
             <div className="px-2 flex flex-row justify-between align-center w-100 h-full relative">
-                <Icon icon="mdi:chevron-left" height="25" width="25" className="ml-2 text-gray-900" />
-                <div className="absolute left-1/2 transform -translate-x-1/2 z-2 w-full h-full">
+                <Icon icon="mdi:chevron-left" height="25" width="25" 
+                    className="z-2 ml-2 text-gray-900 cursor-pointer" 
+                    onClick={() => {navigate(-1)}}
+                />
+                <div className="absolute left-1/2 transform -translate-x-1/2 z-1 w-full h-full">
                     <AudioUpload enabled={image !== null} songUrls={songUrls} setSongUrls={setSongUrls} />
                 </div>
-                <button className="glassy-bg bg-blue-900font-semibold text-blue-600 text-sm mr-4 px-4 py-1 rounded-xl shadow-lg align-self-end cursor-pointer">
+                <button className="z-2 glassy-bg bg-blue-900font-semibold text-blue-600 text-sm mr-4 px-4 py-1 rounded-xl shadow-lg align-self-end cursor-pointer">
                     Post
                 </button>
             </div>
@@ -72,7 +77,7 @@ function PostLayout() {
             { <Gallery 
                 similarityUrl={{imageName: image?.storedName ?? '', imageUrl: image?.storedUrl ?? ''}} 
                 header = {
-                    <div className="inline-flex items-center align-self-start gap-1 text-sm font-medium text-gray-800 mb-2">
+                    <div className="inline-flex items-center align-self-start gap-1 px-2 text-sm font-medium text-gray-800 mb-2">
                         See more
                         <Icon icon="mdi:arrow-down" height="16" width="16" />
                     </div>
