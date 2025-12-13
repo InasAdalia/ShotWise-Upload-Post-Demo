@@ -15,7 +15,7 @@ interface AudioUploadProps {
 function AudioUpload({ selectedSong, onSelectSong, enabled }: AudioUploadProps) {
 
     const [showSelector, setShowSelector] = useState(false);
-    const { playSong, stopSong, currentSong, isPlaying, togglePlaybackEnabled } = useSongManager();
+    const { togglePlay, stopSong, currentSong, isPlaying } = useSongManager();
     
     // Track if the currently playing song is THIS component's selected song
     const isThisSongPlaying = currentSong?.title === selectedSong?.title && isPlaying;
@@ -34,19 +34,19 @@ function AudioUpload({ selectedSong, onSelectSong, enabled }: AudioUploadProps) 
         }
     }, [selectedSong]);
 
-    const togglePlay = async () => {
-        if (!selectedSong?.previewUrl) return;
+    // const togglePlay = async () => {
+    //     if (!selectedSong?.previewUrl) return;
         
-        console.log('yo')
+    //     console.log('yo')
         
-        // 🔑 ENABLE playback first
-        togglePlaybackEnabled();
+    //     // 🔑 ENABLE playback first
+    //     togglePlaybackEnabled();
 
-        console.log('hu')
+    //     console.log('hu')
 
-        // Then play
-        await playSong(selectedSong);
-    };
+    //     // Then play
+    //     await playSong(selectedSong);
+    // };
 
     const renderSelectedSong = () => {
         return selectedSong ? (
@@ -70,7 +70,7 @@ function AudioUpload({ selectedSong, onSelectSong, enabled }: AudioUploadProps) 
 
                 {/* PLAY ICON */}
                 <span
-                    onClick={(e) => { e.stopPropagation(); togglePlay(); }} 
+                    onClick={(e) => { e.stopPropagation(); togglePlay(selectedSong); }} 
                     className="clear-left rounded-full bg-[#eff0f9] h-6 w-6 cursor-pointer flex items-center justify-center group">
                     <span className="bg-white h-4 w-4 rounded-full shadow-md flex items-center justify-center group-hover:bg-rose-600">
                         {isThisSongPlaying ? (

@@ -27,7 +27,8 @@ interface AudioSelectorProps {
 
 function AudioSelector({ selectedSong, onSelectSong, onClose }: AudioSelectorProps) {
 
-    const { songs, playSong, stopSong, currentSong, isPlaying, togglePlaybackEnabled } = useSongManager();
+    const { songs, stopSong, togglePlay, currentSong, isPlaying } = useSongManager();
+
     const [playingIndex, setPlayingIndex] = React.useState<number | null>(null);
 
     // Sync playing index with current song from context
@@ -40,19 +41,6 @@ function AudioSelector({ selectedSong, onSelectSong, onClose }: AudioSelectorPro
         }
     }, [currentSong, isPlaying, songs]);
 
-    const handlePlaySong = async (song: SongData, index: number) => {
-        // If clicking the same song that's playing, stop it
-        if (playingIndex === index && isPlaying) {
-            console.log('stopping audio');
-            stopSong();
-            setPlayingIndex(null);
-            return;
-        }
-        
-        // Play the new song
-        await playSong(song);
-        setPlayingIndex(index);
-    };
 
     const toggleSongSelection = (song: SongData) => {
         // Stop any playing audio when selecting a song
@@ -120,38 +108,27 @@ function AudioSelector({ selectedSong, onSelectSong, onClose }: AudioSelectorPro
                         icon="mdi:trash-can-outline" height="18" width="18"
                         onClick={(e) => { e.stopPropagation(); toggleSongSelection(song); }}
                         className="text-gray-500 hover:text-rose-600 mr-2 cursor-pointer" />
-                ) : ( song === currentSong ? (
+                ) : ( 
                     <span
-                        onClick={(e) => { e.stopPropagation(); togglePlaybackEnabled(); playSong(song) }} 
+                        onClick={(e) => {e.stopPropagation(); selectedSong && togglePlay(selectedSong); }} 
                         className="clear-left rounded-full bg-[#eff0f9] h-10 w-10 cursor-pointer flex items-center justify-center group">
                         <span className="bg-white h-6 w-6 rounded-full shadow-md flex items-center justify-center group-hover:bg-rose-600">
-                                {/* // Pause icon when playing */}
+                                
+                            { song === currentSong ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-white group-hover:stroke-white" width="10" height="10" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#7e9cff" fill="#7e9cff" strokeLinecap="round" strokeLinejoin="round">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                                     <rect x="6" y="5" width="4" height="14" rx="1" />
                                     <rect x="14" y="5" width="4" height="14" rx="1" />
                                 </svg>
-                            
-                                {/* // Play icon when not playing */}
+                            ) : (
                                 <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-white group-hover:stroke-white" width="10" height="10" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#7e9cff" fill="#7e9cff" strokeLinecap="round" strokeLinejoin="round">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                                     <path d="M7 4v16l13 -8z" />
                                 </svg>
+                            )}
                         </span>
                     </span>
-                    ) : (
-                        <span
-                            onClick={(e) => { e.stopPropagation(); handlePlaySong(song, idx); }} 
-                            className="clear-left rounded-full bg-[#eff0f9] h-10 w-10 cursor-pointer flex items-center justify-center group">
-                            <span className="bg-white h-6 w-6 rounded-full shadow-md flex items-center justify-center group-hover:bg-rose-600">            
-                                    {/* // Play icon when not playing */}
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-white group-hover:stroke-white" width="10" height="10" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#7e9cff" fill="#7e9cff" strokeLinecap="round" strokeLinejoin="round">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                                        <path d="M7 4v16l13 -8z" />
-                                    </svg>
-                            </span>
-                        </span>
-                    )
+                    
                 )}
             </div>
         ))

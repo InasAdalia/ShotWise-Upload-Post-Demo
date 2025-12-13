@@ -19,7 +19,7 @@ export function Gallery({header, similarityUrl, mainClass, embedPosts}: GalleryP
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     
     const { isLoading, setIsLoading } = useLoading();
-    const { playSong, stopSong, togglePlaybackEnabled, isPlaybackEnabled, songs } = useSongManager();
+    const { togglePlay, stopSong, isPlaybackEnabled, setIsPlaybackEnabled, songs } = useSongManager();
 
     //handling similarity
     useEffect(() => {
@@ -107,7 +107,7 @@ export function Gallery({header, similarityUrl, mainClass, embedPosts}: GalleryP
     const handleTogglePlayback = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        togglePlaybackEnabled();
+        setIsPlaybackEnabled(!isPlaybackEnabled);
     };
 
     const renderImages = () => {
@@ -135,15 +135,20 @@ export function Gallery({header, similarityUrl, mainClass, embedPosts}: GalleryP
                             className="relative group cursor-pointer"
                             onMouseEnter={() => {
                                 setHoveredIndex(globalIndex);
-                                if (post.song) {
-                                    playSong(post.song);
+                                if (post.song && isPlaybackEnabled) {
+                                    togglePlay(post.song);
                                 }
                             }}
                             onMouseLeave={() => {
                                 setHoveredIndex(null);
                                 stopSong();
                             }}
-                            onClick={handleTogglePlayback}
+                            onClick={(e)=>{
+                                handleTogglePlayback(e);
+                                if (post.song && isPlaybackEnabled) {
+                                    togglePlay(post.song);
+                                }
+                            }}
                         >
                             <img
                                 className="block w-full h-auto rounded-lg object-cover"

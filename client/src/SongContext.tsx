@@ -7,13 +7,14 @@ import { useLoading } from './LoadingContext';
 interface SongManagerContextType {
     currentSong: SongData | null;
     isPlaying: boolean;
-    isPlaybackEnabled: boolean;
-    playSong: (song: SongData) => Promise<void>;
+    togglePlay: (song: SongData) => Promise<void>;
     stopSong: () => void;
-    togglePlaybackEnabled: () => void;
     songs: SongData[];
     loadSongs: () => Promise<void>;
+    isPlaybackEnabled: boolean;
+    setIsPlaybackEnabled: (enabled: boolean) => void;
 }
+
 
 const SongManagerContext = createContext<SongManagerContextType | undefined>(undefined);
 
@@ -94,13 +95,22 @@ export function SongManagerProvider({ children }: SongManagerProviderProps) {
         setCurrentSong(null);
     };
 
-    const playSong = async (song: SongData) => {
-        if (!song.previewUrl || !isPlaybackEnabledRef.current) {
+
+    const togglePlay = async (song: SongData) => {
+        if (!song.previewUrl) return;
+
+        // Same song → stop
+        if (currentSong?.title === song.title && isPlaying) {
+            stopSong();
             return;
         }
 
-        // Stop current audio
-        // stopSong();
+        // Stop any existing audio
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            audioRef.current = null;
+        }
 
         const audio = new Audio(
             `http://localhost:8000/music/proxy-preview?url=${encodeURIComponent(song.previewUrl)}`
@@ -110,53 +120,27 @@ export function SongManagerProvider({ children }: SongManagerProviderProps) {
         setCurrentSong(song);
 
         audio.addEventListener('ended', () => {
-            setIsPlaying(false);
-            setCurrentSong(null);
-            audioRef.current = null;
-        });
-
-        audio.addEventListener('error', (e) => {
-            console.error('Audio playback error:', e);
-            setIsPlaying(false);
-            setCurrentSong(null);
-            audioRef.current = null;
+            stopSong();
         });
 
         try {
-            console.log('playing audio');
             await audio.play();
             setIsPlaying(true);
-        } catch (error) {
-            console.error('Failed to play audio:', error);
-            setIsPlaying(false);
-            setCurrentSong(null);
-            audioRef.current = null;
+        } catch (err) {
+            console.error('Play failed:', err);
+            stopSong();
         }
-    };
-
-    const togglePlaybackEnabled = () => {
-        setIsPlaybackEnabled(prev => {
-            const next = !prev;
-            
-            // If turning off, stop current playback
-            if (!next) {
-                console.log('turning off')
-                stopSong();
-            }
-            
-            return next;
-        });
     };
 
     const value: SongManagerContextType = {
         currentSong,
         isPlaying,
-        isPlaybackEnabled,
-        playSong,
+        togglePlay,
         stopSong,
-        togglePlaybackEnabled,
         songs,
         loadSongs,
+        isPlaybackEnabled,
+        setIsPlaybackEnabled
     };
 
     return (
