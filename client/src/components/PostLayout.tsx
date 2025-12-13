@@ -37,7 +37,7 @@ function PostLayout() {
         <div className="post-layout space-y-4 w-[inherit] text-black flex flex-col max-h-[98vh] items-center overflow-y-auto scrollbar-hide">
             
             
-            <img src={image?.storedUrl || '/wallpaper3.jpg'} alt="post preview" className="upload-bg w-full h-full object-cover object-center" />
+            <img src={image?.storedUrl || '/assets/wallpaper3.jpg'} alt="post preview" className="upload-bg w-full h-full object-cover object-center" />
             
             
             {/* Page Header */}

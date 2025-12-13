@@ -56,7 +56,7 @@ function AudioUpload({ selectedSong, onSelectSong, enabled }: AudioUploadProps) 
                 
                 {/* ALBUM COVER */}
                 <img 
-                    src={matchAlbumCovers(selectedSong?.title ?? 'random1', 0)}
+                    src={matchAlbumCovers(selectedSong?.title ?? '/assets/album-covers/random1', 0)}
                     alt="album cover" 
                     className={`rounded-2xl h-6 ${isThisSongPlaying ? 'animate-[spin_6s_linear_infinite]' : ''}`} 
                 />

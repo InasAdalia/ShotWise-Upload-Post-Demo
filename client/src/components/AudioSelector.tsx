@@ -13,10 +13,10 @@ export const matchAlbumCovers = (songTitle: string, index: number) : string =>{
 
     if (!title) {
         console.log("No match found for:", songTitle);
-        return `public/album-covers/random${index}.jpg`;
+        return `/assets/album-covers/random${index}.jpg`;
     }
 
-    return `public/album-covers/${title.title.toLowerCase()}.jpg`;
+    return `/assets/album-covers/${title.title.toLowerCase()}.jpg`;
 }
 
 interface AudioSelectorProps {

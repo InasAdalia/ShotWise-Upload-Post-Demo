@@ -11,7 +11,7 @@ function FeedLayout() {
 
     return (
         <div className="h-full py-2 relative">
-            <img src={'/wallpaper1.jpg'} alt="post preview" className="upload-bg full-height w-full h-full object-contain object-center" />
+            <img src={'/assets/wallpaper1.jpg'} alt="post preview" className="upload-bg full-height w-full h-full object-contain object-center" />
             
             <Gallery
                 embedPosts={embeddedPosts}
