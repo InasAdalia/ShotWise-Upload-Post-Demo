@@ -1,7 +1,7 @@
 import { Icon } from '@iconify/react'
 import axios from 'axios';
 import React, { useEffect } from 'react'
-import { songLists, type SongMeta } from '../data';
+import { songLists, type SongData } from '../data';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 
@@ -20,8 +20,8 @@ export const matchAlbumCovers = (songTitle: string, index: number) : string =>{
 }
 
 interface AudioSelectorProps {
-    songUrls: { selected: SongMeta | null, lists: SongMeta[]}
-    setSongUrls: (songUrls: { selected: SongMeta | null, lists: SongMeta[]}) => void
+    songUrls: { selected: SongData | null, lists: SongData[]}
+    setSongUrls: (songUrls: { selected: SongData | null, lists: SongData[]}) => void
     onClose: () => void
 }
 
@@ -36,13 +36,14 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
             setIsLoading(true);
 
             // Check localStorage first
-            const localState = localStorage.getItem('songUrlsState');
+            const localState = localStorage.getItem('songData');
                 
                 if (localState) {
                     // If cached data exists, use it
                     const cachedData = JSON.parse(localState);
+                    console.log('cached song', cachedData);
                     // console.log('Using cached song data from localStorage');
-                    setSongUrls({selected: songUrls.selected, lists: cachedData.lists});
+                    setSongUrls({selected: cachedData.selected, lists: cachedData.lists});
                     setIsLoading(false);
                     return; // Exit early, no need to fetch
                 }
@@ -66,7 +67,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
                 setSongUrls(newSongUrls);
                 
                 // Save to localStorage
-                localStorage.setItem('songUrlsState', JSON.stringify(newSongUrls));
+                localStorage.setItem('songData', JSON.stringify(newSongUrls));
                 
         } catch (error) {
             console.error('Error fetching songs:', error);
@@ -105,7 +106,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
     };
 
 
-    const handleSelectSong = (song: SongMeta) => {
+    const handleSelectSong = (song: SongData) => {
         // Stop any playing audio when selecting a song
         if (currentAudio) {
             currentAudio.pause();
@@ -115,7 +116,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
         }
         onClose();
         setSongUrls({selected: song, lists: songUrls.lists});
-        localStorage.setItem('songUrlsState', JSON.stringify({selected: null, lists: songUrls.lists}));
+        localStorage.setItem('songData', JSON.stringify({selected: song, lists: songUrls.lists}));
     }
 
     useEffect(() => {

@@ -1,10 +1,11 @@
 import { Icon } from '@iconify/react';
 import React, { useEffect } from 'react'
 import { useLoading } from '../Context';
+import { type ImageData } from '../data';
 
 interface PostUploadProps {
-    image:  {localUrl: string, storedUrl?: string, storedName?: string, imageFile: File} | null;
-    setImage: (image:  {localUrl: string, storedUrl?: string, storedName?: string, imageFile: File} | null) => void;
+    image:  ImageData | null;
+    setImage: (image:  ImageData | null) => void;
 }
 
 function PostUpload({image, setImage}: PostUploadProps) {
@@ -29,6 +30,13 @@ function PostUpload({image, setImage}: PostUploadProps) {
                 storedUrl: publicUrl, 
                 imageFile: file
             });
+
+            localStorage.setItem('imageData', JSON.stringify({
+                localUrl: imageUrl,
+                storedName: fileName,
+                storedUrl: publicUrl
+                // file is already uploaded into supabase, so retrieve image using storedUrl instead.
+            }))
             // console.log('Public URL:', publicUrl, fileName);
             
         } catch (error) {
@@ -64,11 +72,6 @@ function PostUpload({image, setImage}: PostUploadProps) {
         //call delete api
     }
 
-    useEffect(()=>{
-        console.log('PostUpload component image:', image);
-        // uploadImage();
-    }, [image])
-
     return (
         <div className={`upload-wrapper flex flex-col items-center rounded-2xl ${image && 'relative hover:bg-black'} ${!image ? 'upload-shadow-animate' : ''} ${image && 'relative hover:bg-black'}`}>
             
@@ -96,7 +99,7 @@ function PostUpload({image, setImage}: PostUploadProps) {
                 <>
                     {/* display the img */}
                     <img 
-                        src={image.localUrl} 
+                        src={image.localUrl || image.storedUrl || ''} 
                         alt="uploaded-preview" 
                         className={`rounded-2xl object-contain object-center max-h-[40vh] hover:opacity-50 `}
                     />

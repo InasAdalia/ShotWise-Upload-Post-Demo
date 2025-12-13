@@ -3,20 +3,22 @@ import { Gallery } from './Gallery'
 import PostUpload from './PostUpload'
 import AudioUpload from './AudioUpload';
 import { Icon } from '@iconify/react';
-import type { SongMeta } from '../data';
+import type { SongData, ImageData } from '../data';
 import { useNavigate } from 'react-router-dom';
 
-export interface PostImage{
-    localUrl: string, 
-    storedUrl?: string, 
-    storedName?: string, 
-    imageFile: File
-}
+
 
 function PostLayout() {
 
-    const [image, setImage] = useState<PostImage | null>(null); //stores image urls
-    const [songUrls, setSongUrls] = useState<{ selected: SongMeta | null, lists: SongMeta[]}>({selected: null, lists: []}); // Add this
+    const [image, setImage] = useState<ImageData | null>(JSON.parse(localStorage.getItem('imageData') ?? 'null')); //stores image urls
+    const [songUrls, setSongUrls] = useState<{ selected: SongData | null, lists: SongData[]}>(JSON.parse(localStorage.getItem('songData') ?? '[]')); // Add this
+    
+    useEffect(()=>{
+        //fetch from local storage upon page load/ refresh
+        // setImage();
+        // setSongUrls(JSON.parse(localStorage.getItem('songUrlsState') ?? 'null'));
+    })
+
     useEffect(()=>{
         // console.log(image)
     }, [image])
@@ -26,9 +28,7 @@ function PostLayout() {
     return (
         <div className="post-layout space-y-4 w-[inherit] text-black flex flex-col max-h-[98vh] items-center overflow-y-auto scrollbar-hide">
             
-            {/* effects & bg */}
-            <div className="gradient-bottom-back"/>
-            <div className="gradient-bottom-front"/>
+            
             <img src={image?.localUrl ?? '/wallpaper3.jpg'} alt="post preview" className="upload-bg w-full h-full object-cover object-center" />
             
             
@@ -40,15 +40,15 @@ function PostLayout() {
             </div>
 
             {/* Subheader */}
-            <div className="px-2 flex flex-row justify-between align-center w-100 h-full relative">
+            <div className="px-2 flex flex-row justify-between align-center w-100 min-h-7 relative">
                 <Icon icon="mdi:chevron-left" height="25" width="25" 
-                    className="z-2 ml-2 text-gray-900 cursor-pointer" 
+                    className="z-2 absolute left-2 top-0 ml-2 text-gray-900 cursor-pointer" 
                     onClick={() => {navigate(-1)}}
                 />
-                <div className="absolute left-1/2 transform -translate-x-1/2 z-1 w-full h-full">
+                <div className="absolute left-1/2 transform -translate-x-1/2 top-[-2.5px] z-1 w-full h-full">
                     <AudioUpload enabled={image !== null} songUrls={songUrls} setSongUrls={setSongUrls} />
                 </div>
-                <button className="z-2 glassy-bg bg-blue-900font-semibold text-blue-600 text-sm mr-4 px-4 py-1 rounded-xl shadow-lg align-self-end cursor-pointer">
+                <button className="z-3 absolute right-2 top-0 glassy-bg bg-blue-900font-semibold text-blue-600 text-sm mr-4 px-4 py-1 rounded-xl shadow-lg align-self-end cursor-pointer">
                     Post
                 </button>
             </div>
@@ -59,7 +59,7 @@ function PostLayout() {
               className={`flex flex-col gap-2 items-center justify-center w-full`}
             >   
                 {/* image upload */}
-                <div className = {`max-w-60 ${image ? 'max-w-auto aspect-auto' : ''}`}>
+                <div className = {`max-w-60 min-h-[40vh] ${image ? 'max-w-auto aspect-auto' : ''}`}>
                     <PostUpload 
                         image={image} 
                         setImage={setImage} 

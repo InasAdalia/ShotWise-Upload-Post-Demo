@@ -75,7 +75,6 @@
   text-shadow: 0 2px 4px rgb(0 0 0 / 10%);
   box-shadow: 0 6px 6px rgb(0 0 0 / 20%), 0 0 20px rgb(0 0 0 / 10%);
   text-align: center;
-  z-index:0;
   
   /* outline shine */
   &::after {
@@ -135,6 +134,7 @@
 }
 
 .gradient-bottom-back{
+  pointer-events: none;
   position: absolute;
   bottom: 0;
   width: inherit;
@@ -144,11 +144,12 @@
 }
 
 .gradient-bottom-front{
+  pointer-events: none;
   position: absolute;
   bottom: 0;
   width: inherit;
   height: 100vh;
-  z-index: 0;
+  z-index: 1;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 90%, #FFFFFF 100%);
 }
 

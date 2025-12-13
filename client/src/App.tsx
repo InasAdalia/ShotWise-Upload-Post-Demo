@@ -39,6 +39,9 @@ function App() {
   return (
     <div className="phone-wrapper relative w-[375px] min-h-[95vh] h-[95vh] overflow-hidden rounded-[20px]">
       <div className="absolute inset-0 bg-white -z-5 w-[inherit] h-[100vh] " />
+        {/* effects & bg */}
+            <div className="gradient-bottom-back"/>
+            <div className="gradient-bottom-front"/>
         <LoadingProvider>
           <RouterProvider router={router} />
         </LoadingProvider>

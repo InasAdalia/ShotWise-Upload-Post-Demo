@@ -1,12 +1,12 @@
 import { Icon } from '@iconify/react'
 import  {  useState } from 'react'
 import AudioSelector, { matchAlbumCovers } from './AudioSelector';
-import type { SongMeta } from '../data';
+import type { SongData } from '../data';
 
 interface AudioUploadProps {
     enabled: boolean
-    songUrls: { selected: SongMeta | null, lists: SongMeta[]}
-    setSongUrls: (songUrls: { selected: SongMeta | null, lists: SongMeta[]}) => void
+    songUrls: { selected: SongData | null, lists: SongData[]}
+    setSongUrls: (songUrls: { selected: SongData | null, lists: SongData[]}) => void
 }
 
 function AudioUpload({songUrls, setSongUrls, enabled}: AudioUploadProps) {
@@ -22,25 +22,25 @@ function AudioUpload({songUrls, setSongUrls, enabled}: AudioUploadProps) {
 
         // if no audio yet, create one
         if (!audio) {
-        const newAudio = new Audio(
-            `http://localhost:8000/music/proxy-preview?url=${encodeURIComponent(
-            songUrl
-            )}`
-        );
-        newAudio.addEventListener('ended', () => setIsPlaying(false));
-        setAudio(newAudio);
-        await newAudio.play();
-        setIsPlaying(true);
-        return;
+            const newAudio = new Audio(
+                `http://localhost:8000/music/proxy-preview?url=${encodeURIComponent(
+                songUrl
+                )}`
+            );
+            newAudio.addEventListener('ended', () => setIsPlaying(false));
+            setAudio(newAudio);
+            await newAudio.play();
+            setIsPlaying(true);
+            return;
         }
 
         // if already created, just play/pause
         if (isPlaying) {
-        audio.pause();
-        setIsPlaying(false);
+            audio.pause();
+            setIsPlaying(false);
         } else {
-        await audio.play();
-        setIsPlaying(true);
+            await audio.play();
+            setIsPlaying(true);
         }
     };
 

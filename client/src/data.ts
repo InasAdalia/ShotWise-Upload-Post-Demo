@@ -10,7 +10,7 @@ export const songLists=[
 ]
 
 
-export interface SongMeta{
+export interface SongData{
     title: string,
     artist: string,
     previewUrl?: string,
@@ -18,6 +18,13 @@ export interface SongMeta{
     albumName: string,
     releaseDate: string,
     popularity: string,
+}
+
+export interface ImageData{
+    localUrl: string, 
+    storedUrl?: string, 
+    storedName?: string, 
+    imageFile?: File //need to be available only for uploading into supabase
 }
 
 export const imageDataset=[

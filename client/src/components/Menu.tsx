@@ -7,7 +7,7 @@ function Menu() {
 
 
   return (
-    <div className="absolute bottom-0 h-12 w-full bg-black flex flex-row justify-around items-center">
+    <div className="absolute z-2 bottom-0 h-12 w-full bg-black flex flex-row justify-around items-center">
         <Icon 
             icon={'basil:search-solid'} height={'25'} 
             className='text-gray-100 hover:text-blue-800 cursor-pointer'
