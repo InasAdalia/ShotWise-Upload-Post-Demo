@@ -91,7 +91,7 @@ function AudioSelector({ selectedSong, onSelectSong, onClose }: AudioSelectorPro
                 onClick={() => {
                     toggleSongSelection(song);
                 }}
-                className={`${selectedSong?.title === song.title && 'selected'} cursor-pointer glassy-medium h-auto flex gap-1 items-center justify-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl`}>
+                className={`${(selectedSong?.title === song.title) && 'selected'} song-selection cursor-pointer glassy-medium h-auto flex gap-1 items-center justify-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl`}>
                 {/* ALBUM COVER */}
                 <img src={matchAlbumCovers(song?.title, idx)} 
                     className={`rounded-2xl h-8 ${playingIndex === idx && isPlaying ? 'animate-[spin_6s_linear_infinite]' : ''}`} />
@@ -110,7 +110,7 @@ function AudioSelector({ selectedSong, onSelectSong, onClose }: AudioSelectorPro
                         className="text-gray-500 hover:text-rose-600 mr-2 cursor-pointer" />
                 ) : ( 
                     <span
-                        onClick={(e) => {e.stopPropagation(); selectedSong && togglePlay(selectedSong); }} 
+                        onClick={(e) => {e.stopPropagation(); song && togglePlay(song); }} 
                         className="clear-left rounded-full bg-[#eff0f9] h-10 w-10 cursor-pointer flex items-center justify-center group">
                         <span className="bg-white h-6 w-6 rounded-full shadow-md flex items-center justify-center group-hover:bg-rose-600">
                                 

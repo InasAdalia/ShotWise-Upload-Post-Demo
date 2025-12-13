@@ -44,7 +44,7 @@
 
 }
 
-.glassy-medium.selected{
+.glassy-medium.selected, .song-selection:hover{
   /* 1. Set a semi-transparent background color (Figma Fill) */
   background-color: rgba(205, 229, 245, 0.12); /* Example: 12% white opacity */
   border: 1px solid rgba(255, 255, 255, 0.25);
