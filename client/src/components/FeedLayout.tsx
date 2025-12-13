@@ -6,7 +6,7 @@ import Menu from './Menu'
 function FeedLayout() {
 
     const [embeddedPosts] = useState<PostData[]>(JSON.parse(localStorage.getItem('feedEmbeds') ?? '[]'));
-    
+
     //useEffect(()=>{console.log(embeddedPosts)}, []) 
 
     return (

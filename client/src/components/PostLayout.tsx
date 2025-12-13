@@ -16,7 +16,7 @@ function PostLayout() {
     const navigate = useNavigate();
     
     useEffect(()=>{
-        console.log('image', image)
+        // console.log('image', image)
         //fetch from local storage upon page load/ refresh
         // setImage();
         // setSongUrls(JSON.parse(localStorage.getItem('songUrlsState') ?? 'null'));
@@ -32,6 +32,9 @@ function PostLayout() {
         const postData : PostData = {image, song: songUrls.selected, owner: 'you'}
         localStorage.setItem('feedEmbeds', JSON.stringify([...prevEmbeddedPosts, postData]));
         navigate('/feed');
+        // remove previous upload draft
+        localStorage.removeItem('imageData');
+        localStorage.setItem('songData', JSON.stringify({selected: null, lists: songUrls.lists}));
     }
 
     return (

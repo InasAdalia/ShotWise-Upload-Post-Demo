@@ -41,7 +41,7 @@ function AudioSelector({songUrls, setSongUrls, onClose}: AudioSelectorProps) {
                 if (localState) {
                     // If cached data exists, use it
                     const cachedData = JSON.parse(localState);
-                    console.log('cached song', cachedData);
+                    // console.log('cached song', cachedData);
                     // console.log('Using cached song data from localStorage');
                     setSongUrls({selected: cachedData.selected, lists: cachedData.lists});
                     setIsLoading(false);

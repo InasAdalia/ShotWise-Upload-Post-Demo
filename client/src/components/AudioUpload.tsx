@@ -1,7 +1,8 @@
 import { Icon } from '@iconify/react'
-import  {  useState } from 'react'
+import  {  useEffect, useState } from 'react'
 import AudioSelector, { matchAlbumCovers } from './AudioSelector';
 import type { SongData } from '../data';
+import { useLocation } from 'react-router-dom';
 
 interface AudioUploadProps {
     enabled: boolean
@@ -43,6 +44,14 @@ function AudioUpload({songUrls, setSongUrls, enabled}: AudioUploadProps) {
             setIsPlaying(true);
         }
     };
+
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.pathname !== '/upload') {
+            setAudio(null);
+        }
+    }, [ location.pathname]);
 
     
 
