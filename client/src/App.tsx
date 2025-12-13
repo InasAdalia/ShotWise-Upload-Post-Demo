@@ -1,21 +1,22 @@
 import axios from 'axios';
 import './App.css'
-import { LoadingProvider } from './Context'
+import { LoadingProvider } from './LoadingContext'
 import { imageDataset } from './data';
 import {router} from './Router'
 import { RouterProvider } from 'react-router-dom';
+import { SongManagerProvider } from './SongContext';
 
 function App() {
 
   const bulkUploadAndIndex = async () => {
-      try {
+    try {
 
-          imageDataset.forEach((image, index) => {
-              uploadImage(`image_${index}`, image);
-          })
-      } catch (err) {
-          console.error('Bulk upload error:', err);
-  }
+      imageDataset.forEach((image, index) => {
+          uploadImage(`image_${index}`, image);
+      })
+    } catch (err) {
+      console.error('Bulk upload error:', err);
+    }
   };
   
   const uploadImage = async (imageName: string, imageUrl: string) => {
@@ -43,13 +44,15 @@ function App() {
             <div className="gradient-bottom-back"/>
             <div className="gradient-bottom-front"/>
         <LoadingProvider>
-          <RouterProvider router={router} />
+          <SongManagerProvider> 
+            <RouterProvider router={router} />
+          </SongManagerProvider>
         </LoadingProvider>
+        
         {/* For dev mode purposes. unhide button to bulk import imageDataset into Pinecone */}
         <button
-        className="hidden bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-        
-        onClick={()=>{
+          className="hidden bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+          onClick={()=>{
             bulkUploadAndIndex();
         }}
         >bulk upload</button>

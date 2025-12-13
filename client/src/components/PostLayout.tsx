@@ -12,36 +12,29 @@ function PostLayout() {
     
     //post data
     const [image, setImage] = useState<ImageData | null>(JSON.parse(localStorage.getItem('imageData') ?? 'null')); //stores image urls
-    const [songUrls, setSongUrls] = useState<{ selected: SongData | null, lists: SongData[]}>(JSON.parse(localStorage.getItem('songData') ?? '[]')); // Add this
+    const [selectedSong, setSelectedSong] = useState<SongData | null>(JSON.parse(localStorage.getItem('selectedSong') ?? 'null')); // Add this
     const navigate = useNavigate();
-    
-    useEffect(()=>{
-        // console.log('image', image)
-        //fetch from local storage upon page load/ refresh
-        // setImage();
-        // setSongUrls(JSON.parse(localStorage.getItem('songUrlsState') ?? 'null'));
-    })
 
     useEffect(()=>{
-        // console.log(image)
+        console.log(image)
     }, [image])
 
     const handlePost=()=>{
         if (!image) return;
         const prevEmbeddedPosts = JSON.parse(localStorage.getItem('feedEmbeds') ?? '[]') as PostData[];
-        const postData : PostData = {image, song: songUrls.selected, owner: 'you'}
+        const postData : PostData = {image, song: selectedSong, owner: 'you'}
         localStorage.setItem('feedEmbeds', JSON.stringify([...prevEmbeddedPosts, postData]));
         navigate('/feed');
         // remove previous upload draft
         localStorage.removeItem('imageData');
-        localStorage.setItem('songData', JSON.stringify({selected: null, lists: songUrls.lists}));
+        localStorage.removeItem('selectedSong');
     }
 
     return (
         <div className="post-layout space-y-4 w-[inherit] text-black flex flex-col max-h-[98vh] items-center overflow-y-auto scrollbar-hide">
             
             
-            <img src={image?.localUrl ?? '/wallpaper3.jpg'} alt="post preview" className="upload-bg w-full h-full object-cover object-center" />
+            <img src={image?.storedUrl || '/wallpaper3.jpg'} alt="post preview" className="upload-bg w-full h-full object-cover object-center" />
             
             
             {/* Page Header */}
@@ -58,7 +51,7 @@ function PostLayout() {
                     onClick={() => {navigate(-1)}}
                 />
                 <div className="absolute left-1/2 transform -translate-x-1/2 top-[-2.5px] z-1 w-full h-full">
-                    <AudioUpload enabled={image !== null} songUrls={songUrls} setSongUrls={setSongUrls} />
+                    <AudioUpload enabled={image !== null} selectedSong={selectedSong} onSelectSong={setSelectedSong} />
                 </div>
                 <button 
                     onClick={handlePost} 
@@ -67,7 +60,7 @@ function PostLayout() {
                 </button>
             </div>
 
-            {/* <AudioSelector onClose={()=>{}} songUrls={{ selected: null, lists: [] }} setSongUrls={()=>{}} /> */}
+            {/* <AudioSelector onClose={()=>{}} selectedSong={{ selected: null, lists: [] }} setSelectedSong={()=>{}} /> */}
 
             <div
               className={`flex flex-col gap-2 items-center justify-center w-full`}
@@ -88,11 +81,9 @@ function PostLayout() {
                 ></textarea>
             </div>
 
-            { image?.storedUrl && image?.storedName ? <Gallery 
-                similarityUrl={{
-                    imageName: image?.storedName, 
-                    imageUrl: image?.storedUrl
-                }} 
+            { image?.storedUrl ? <Gallery 
+                similarityUrl={image.storedUrl} 
+                mainClass={"pb-10"}
                 header = {
                     <div className="inline-flex items-center align-self-start gap-1 px-2 text-sm font-medium text-gray-800 mb-2">
                         See more
@@ -101,6 +92,7 @@ function PostLayout() {
                 }
                 />
             : <Gallery 
+                mainClass={"pb-10"}
                 header = {
                     <div className="inline-flex items-center align-self-start gap-1 px-2 text-sm font-medium text-gray-800 mb-2">
                         See more

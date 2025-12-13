@@ -1,81 +1,79 @@
+// File: client\src\components\AudioUpload.tsx
 import { Icon } from '@iconify/react'
-import  {  useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import AudioSelector, { matchAlbumCovers } from './AudioSelector';
 import type { SongData } from '../data';
 import { useLocation } from 'react-router-dom';
+import { useSongManager } from '../SongContext';
 
 interface AudioUploadProps {
-    enabled: boolean
-    songUrls: { selected: SongData | null, lists: SongData[]}
-    setSongUrls: (songUrls: { selected: SongData | null, lists: SongData[]}) => void
+    enabled: boolean;
+    selectedSong: SongData | null;
+    onSelectSong: (song: SongData | null) => void;
 }
 
-function AudioUpload({songUrls, setSongUrls, enabled}: AudioUploadProps) {
+function AudioUpload({ selectedSong, onSelectSong, enabled }: AudioUploadProps) {
 
     const [showSelector, setShowSelector] = useState(false);
-    const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-
-    const hasSelected = songUrls?.selected !==null && songUrls?.selected.previewUrl !== null;
-
-    const togglePlay = async (songUrl: string) => {
-        if (!songUrl) return;
-
-        // if no audio yet, create one
-        if (!audio) {
-            const newAudio = new Audio(
-                `http://localhost:8000/music/proxy-preview?url=${encodeURIComponent(
-                songUrl
-                )}`
-            );
-            newAudio.addEventListener('ended', () => setIsPlaying(false));
-            setAudio(newAudio);
-            await newAudio.play();
-            setIsPlaying(true);
-            return;
-        }
-
-        // if already created, just play/pause
-        if (isPlaying) {
-            audio.pause();
-            setIsPlaying(false);
-        } else {
-            await audio.play();
-            setIsPlaying(true);
-        }
-    };
+    const { playSong, stopSong, currentSong, isPlaying, togglePlaybackEnabled } = useSongManager();
+    
+    // Track if the currently playing song is THIS component's selected song
+    const isThisSongPlaying = currentSong?.title === selectedSong?.title && isPlaying;
 
     const location = useLocation();
 
     useEffect(() => {
         if (location.pathname !== '/upload') {
-            setAudio(null);
+            stopSong();
         }
-    }, [ location.pathname]);
+    }, [location.pathname]);
 
-    
+    useEffect(() => {
+        if (selectedSong) {
+            
+        }
+    }, [selectedSong]);
+
+    const togglePlay = async () => {
+        if (!selectedSong?.previewUrl) return;
+        
+        console.log('yo')
+        
+        // 🔑 ENABLE playback first
+        togglePlaybackEnabled();
+
+        console.log('hu')
+
+        // Then play
+        await playSong(selectedSong);
+    };
 
     const renderSelectedSong = () => {
-        return hasSelected ? (
+        return selectedSong ? (
             <div
-                onClick={()=>{setShowSelector(!showSelector)}}
-                className={`glassy-bg cursor-pointer hover:bg-grayhover:text-white h-[fit-content] w-auto max-w-50 flex gap-1 justify-center items-center px-2 py-1 relative max-h-40 shadow-lg rounded-xl`}>
+                onClick={() => { setShowSelector(!showSelector) }}
+                className={`glassy-bg cursor-pointer hover:bg-gray hover:text-white h-[fit-content] w-auto max-w-50 flex gap-1 justify-center items-center px-2 py-1 relative max-h-40 shadow-lg rounded-xl`}>
                 
                 {/* ALBUM COVER */}
-                <img src={matchAlbumCovers(songUrls?.selected?.title ?? 'random1', 0)}
-                    alt="album cover" className={`rounded-2xl h-6 ${isPlaying ? 'animate-[spin_6s_linear_infinite]' : ''}`} />
+                <img 
+                    src={matchAlbumCovers(selectedSong?.title ?? 'random1', 0)}
+                    alt="album cover" 
+                    className={`rounded-2xl h-6 ${isThisSongPlaying ? 'animate-[spin_6s_linear_infinite]' : ''}`} 
+                />
 
                 {/* SONG TITLE */}
-                 <div className="text-start text-xs font-semibold grow" title={songUrls?.selected?.title}>
-                    <p className="text-xs font-normal text-ellipsis whitespace-nowrap overflow-hidden max-w-30"><span className="font-semibold">{songUrls?.selected?.artist}</span> - {songUrls?.selected?.title}</p>
+                <div className="text-start text-xs font-semibold grow" title={selectedSong?.title}>
+                    <p className="text-xs font-normal text-ellipsis whitespace-nowrap overflow-hidden max-w-30">
+                        <span className="font-semibold">{selectedSong?.artist}</span> - {selectedSong?.title}
+                    </p>
                 </div>
 
                 {/* PLAY ICON */}
                 <span
-                    onClick={(e)=>{e.stopPropagation(); togglePlay(songUrls?.selected?.previewUrl ?? '')}} 
+                    onClick={(e) => { e.stopPropagation(); togglePlay(); }} 
                     className="clear-left rounded-full bg-[#eff0f9] h-6 w-6 cursor-pointer flex items-center justify-center group">
                     <span className="bg-white h-4 w-4 rounded-full shadow-md flex items-center justify-center group-hover:bg-rose-600">
-                        {isPlaying ? (
+                        {isThisSongPlaying ? (
                             // Pause icon when playing
                             <svg xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-white group-hover:stroke-white" width="10" height="10" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#7e9cff" fill="#7e9cff" strokeLinecap="round" strokeLinejoin="round">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -89,33 +87,35 @@ function AudioUpload({songUrls, setSongUrls, enabled}: AudioUploadProps) {
                                 <path d="M7 4v16l13 -8z" />
                             </svg>
                         )}
-                        
                     </span>
                 </span>
-
             </div>
-        ) : ( <div
-                onClick={()=>{enabled && setShowSelector(!showSelector)}} 
-                className={`glassy-bg ${enabled ? 'cursor-pointer' : 'cursor-default text-gray-500'} max-w-50  h-auto w-auto flex px-3 gap-3 justify-center items-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl`}>
+        ) : (
+            <div
+                onClick={() => { enabled && setShowSelector(!showSelector) }} 
+                className={`glassy-bg ${enabled ? 'cursor-pointer' : 'cursor-default text-gray-500'} max-w-50 h-auto w-auto flex px-3 gap-3 justify-center items-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl`}>
                 <Icon 
                     icon="mdi:music" height="20" width="20" 
-                    />
+                />
                 <p className="text-ellipsis text-sm text-center self-center whitespace-nowrap overflow-hidden max-w-[200px]">Add Sound</p>
-                
             </div>
         )
     }
 
-
-  return (
-    <>
-        <div className="flex justify-center items-center w-full">
-            {renderSelectedSong()}
-        </div>
-        {showSelector && <AudioSelector onClose={()=>{setShowSelector(false)}} songUrls={songUrls ?? { selected: null, lists: [] }} setSongUrls={setSongUrls} />}
-        {/* delete icon */}
-    </>
-  )
+    return (
+        <>
+            <div className="flex justify-center items-center w-full">
+                {renderSelectedSong()}
+            </div>
+            {showSelector && (
+                <AudioSelector 
+                    onClose={() => { setShowSelector(false) }} 
+                    selectedSong={selectedSong}
+                    onSelectSong={onSelectSong}
+                />
+            )}
+        </>
+    )
 }
 
 export default AudioUpload

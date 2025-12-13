@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react';
 import React, { useEffect } from 'react'
-import { useLoading } from '../Context';
+import { useLoading } from '../LoadingContext';
 import { type ImageData } from '../data';
 
 interface PostUploadProps {
@@ -72,9 +72,14 @@ function PostUpload({image, setImage}: PostUploadProps) {
         //call delete api
     }
 
+    const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+        // The image failed to load, try using the storedUrl instead
+        event.currentTarget.src = image?.storedUrl || '';
+    };
+
 
     return (
-        <div className={`upload-wrapper flex flex-col items-center rounded-2xl ${image && 'relative hover:bg-black'} ${!image ? 'upload-shadow-animate' : ''} ${image && 'relative hover:bg-black'}`}>
+        <div className={`upload-wrapper group flex flex-col items-center rounded-2xl ${image && 'relative hover:bg-black'} ${!image ? 'upload-shadow-animate' : ''} ${image && 'relative hover:bg-black'}`}>
             
             {!image ? 
             
@@ -101,15 +106,18 @@ function PostUpload({image, setImage}: PostUploadProps) {
                     {/* display the img */}
                     <img 
                         src={image.localUrl || image.storedUrl || ''} 
+                        onError={(event) => {
+                            handleImageError(event);
+                        }}
                         alt="uploaded-preview" 
-                        className={`rounded-2xl object-contain object-center max-h-[40vh] hover:opacity-50 `}
+                        className={`rounded-2xl object-contain object-center max-h-[40vh] group-hover:opacity-50 `}
                     />
                     
                     <Icon   
                         icon="mdi:trash-can-outline" 
                         height="20" 
                         width="20" 
-                        className="text-gray-900 absolute top-2 right-2 cursor-pointer"
+                        className="group-hover:opacity-100 opacity-0 text-gray-900 absolute top-2 right-2 cursor-pointer"
                         onMouseOver={()=>{}}
                         onClick={()=>{
                             handleCancelUpload();
