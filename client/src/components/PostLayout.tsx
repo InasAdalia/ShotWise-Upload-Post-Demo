@@ -5,6 +5,7 @@ import AudioUpload from './AudioUpload';
 import { Icon } from '@iconify/react';
 import type { SongData, ImageData, PostData } from '../data';
 import { useNavigate } from 'react-router-dom';
+import { useSongManager } from '../SongContext';
 
 
 
@@ -13,6 +14,7 @@ function PostLayout() {
     //post data
     const [image, setImage] = useState<ImageData | null>(JSON.parse(localStorage.getItem('imageData') ?? 'null')); //stores image urls
     const [selectedSong, setSelectedSong] = useState<SongData | null>(JSON.parse(localStorage.getItem('selectedSong') ?? 'null')); // Add this
+    const { stopSong } = useSongManager();
     const navigate = useNavigate();
 
     useEffect(()=>{
@@ -28,6 +30,7 @@ function PostLayout() {
         // remove previous upload draft
         localStorage.removeItem('imageData');
         localStorage.removeItem('selectedSong');
+        stopSong();
     }
 
     return (

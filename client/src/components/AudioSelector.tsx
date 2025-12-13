@@ -28,7 +28,6 @@ interface AudioSelectorProps {
 function AudioSelector({ selectedSong, onSelectSong, onClose }: AudioSelectorProps) {
 
     const { songs, stopSong, togglePlay, currentSong, isPlaying } = useSongManager();
-
     const [playingIndex, setPlayingIndex] = React.useState<number | null>(null);
 
     // Sync playing index with current song from context

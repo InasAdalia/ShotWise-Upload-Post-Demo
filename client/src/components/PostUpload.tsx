@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react';
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useLoading } from '../LoadingContext';
 import { type ImageData } from '../data';
 

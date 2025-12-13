@@ -15,10 +15,8 @@ interface GalleryProps{
 }
 
 export function Gallery({header, similarityUrl, mainClass, embedPosts}: GalleryProps) {
-    const [posts, setPosts] = useState<PostData[]>(embedPosts || []);
-    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-    
-    const { isLoading, setIsLoading } = useLoading();
+    const [posts, setPosts] = useState<PostData[]>(embedPosts || []);    
+    const { setIsLoading } = useLoading();
     const { togglePlay, stopSong, isPlaybackEnabled, setIsPlaybackEnabled, songs } = useSongManager();
 
     //handling similarity
@@ -134,13 +132,11 @@ export function Gallery({header, similarityUrl, mainClass, embedPosts}: GalleryP
                             key={`${post.owner}-${globalIndex}`}
                             className="relative group cursor-pointer"
                             onMouseEnter={() => {
-                                setHoveredIndex(globalIndex);
                                 if (post.song && isPlaybackEnabled) {
                                     togglePlay(post.song);
                                 }
                             }}
                             onMouseLeave={() => {
-                                setHoveredIndex(null);
                                 stopSong();
                             }}
                             onClick={(e)=>{
@@ -165,7 +161,7 @@ export function Gallery({header, similarityUrl, mainClass, embedPosts}: GalleryP
                                 opacity-0
                                 group-hover:opacity-100
                                 transition-opacity duration-300
-                                bg-[linear-gradient(to_bottom,rgba(0,0,0,0.7),transparent_20%),linear-gradient(to_top,rgba(0,0,0,0.7),transparent_20%)]
+                                bg-[linear-gradient(to_bottom,rgba(0,0,0,0.7),transparent_20%),linear-gradient(to_top,rgba(0,0,0,0.7),transparent_40%)]
                                 "
                             />
 
