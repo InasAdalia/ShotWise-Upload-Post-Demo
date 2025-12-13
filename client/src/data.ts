@@ -27,6 +27,20 @@ export interface ImageData{
     imageFile?: File //need to be available only for uploading into supabase
 }
 
+export interface PostData{
+    image: ImageData,
+    song: SongData | null,
+    owner? : string
+}
+
+export const randomOwners =[
+    'inasi_ayam',
+    'spoons',
+    'whatDoUMinn',
+    'apple_jus',
+    'jaredjagreenjablue'
+]
+
 export const imageDataset=[
     'https://i.pinimg.com/736x/66/1c/7e/661c7ededd4564d0fabe6cb24e5caa13.jpg',
     'https://i.pinimg.com/736x/45/f5/b3/45f5b317fd3812f570e735ca441e27c0.jpg',

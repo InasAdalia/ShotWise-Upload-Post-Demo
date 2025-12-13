@@ -3,17 +3,20 @@ import { Gallery } from './Gallery'
 import PostUpload from './PostUpload'
 import AudioUpload from './AudioUpload';
 import { Icon } from '@iconify/react';
-import type { SongData, ImageData } from '../data';
+import type { SongData, ImageData, PostData } from '../data';
 import { useNavigate } from 'react-router-dom';
 
 
 
 function PostLayout() {
-
+    
+    //post data
     const [image, setImage] = useState<ImageData | null>(JSON.parse(localStorage.getItem('imageData') ?? 'null')); //stores image urls
     const [songUrls, setSongUrls] = useState<{ selected: SongData | null, lists: SongData[]}>(JSON.parse(localStorage.getItem('songData') ?? '[]')); // Add this
+    const navigate = useNavigate();
     
     useEffect(()=>{
+        console.log('image', image)
         //fetch from local storage upon page load/ refresh
         // setImage();
         // setSongUrls(JSON.parse(localStorage.getItem('songUrlsState') ?? 'null'));
@@ -23,7 +26,13 @@ function PostLayout() {
         // console.log(image)
     }, [image])
 
-    const navigate = useNavigate();
+    const handlePost=()=>{
+        if (!image) return;
+        const prevEmbeddedPosts = JSON.parse(localStorage.getItem('feedEmbeds') ?? '[]') as PostData[];
+        const postData : PostData = {image, song: songUrls.selected, owner: 'you'}
+        localStorage.setItem('feedEmbeds', JSON.stringify([...prevEmbeddedPosts, postData]));
+        navigate('/feed');
+    }
 
     return (
         <div className="post-layout space-y-4 w-[inherit] text-black flex flex-col max-h-[98vh] items-center overflow-y-auto scrollbar-hide">
@@ -48,7 +57,9 @@ function PostLayout() {
                 <div className="absolute left-1/2 transform -translate-x-1/2 top-[-2.5px] z-1 w-full h-full">
                     <AudioUpload enabled={image !== null} songUrls={songUrls} setSongUrls={setSongUrls} />
                 </div>
-                <button className="z-3 absolute right-2 top-0 glassy-bg bg-blue-900font-semibold text-blue-600 text-sm mr-4 px-4 py-1 rounded-xl shadow-lg align-self-end cursor-pointer">
+                <button 
+                    onClick={handlePost} 
+                    className="z-3 absolute right-2 top-0 glassy-bg bg-blue-900font-semibold text-blue-600 text-sm mr-4 px-4 py-1 rounded-xl shadow-lg align-self-end cursor-pointer">
                     Post
                 </button>
             </div>
@@ -74,15 +85,27 @@ function PostLayout() {
                 ></textarea>
             </div>
 
-            { <Gallery 
-                similarityUrl={{imageName: image?.storedName ?? '', imageUrl: image?.storedUrl ?? ''}} 
+            { image?.storedUrl && image?.storedName ? <Gallery 
+                similarityUrl={{
+                    imageName: image?.storedName, 
+                    imageUrl: image?.storedUrl
+                }} 
                 header = {
                     <div className="inline-flex items-center align-self-start gap-1 px-2 text-sm font-medium text-gray-800 mb-2">
                         See more
                         <Icon icon="mdi:arrow-down" height="16" width="16" />
                     </div>
                 }
-                />}
+                />
+            : <Gallery 
+                header = {
+                    <div className="inline-flex items-center align-self-start gap-1 px-2 text-sm font-medium text-gray-800 mb-2">
+                        See more
+                        <Icon icon="mdi:arrow-down" height="16" width="16" />
+                    </div>
+                }
+                />
+            }
         </div>
     )
 }

@@ -1,19 +1,21 @@
 import axios from 'axios';
-import type { PostImage } from './PostLayout';
 import { useEffect, useState } from 'react';
 import { useLoading } from '../Context';
+import { randomOwners, songLists, type ImageData, type PostData } from '../data';
 
 interface GalleryProps{
     similarityUrl?: {imageName: string, imageUrl: string}
     header?: React.ReactNode
     mainClass?: string
+    embedPosts?: PostData[] //will be embedded during fetchAny()
 }
-export function Gallery({header, similarityUrl, mainClass}: GalleryProps) {
+export function Gallery({header, similarityUrl, mainClass, embedPosts}: GalleryProps) {
     
-    const [images, setImages] = useState<PostImage[]>([]);
+    const [posts, setPosts] = useState<PostData[]>(embedPosts || []);
     const { setIsLoading } = useLoading();
 
     useEffect(()=>{
+        console.log('posts', posts)
         fetchAny()
     },[])
 
@@ -28,7 +30,7 @@ export function Gallery({header, similarityUrl, mainClass}: GalleryProps) {
     const fetchSimilarImages=async(imageUrl: string)=>{
         try {
             setIsLoading(true);
-            setImages([]);
+            setPosts([]);
             console.log('Searching for similar images...');
         
             const result = await axios.post("http://localhost:8000/image/similarity-search", {
@@ -36,10 +38,7 @@ export function Gallery({header, similarityUrl, mainClass}: GalleryProps) {
                 topK: 10, // Return top 10 similar images
             });
             const filtered = filterImages(result.data.results);
-            setImages(filtered);
-        
-            // console.log('Similar images:', result.data.results);
-            return result.data.results;
+            setPosts(setFakePosts(filtered));
         } catch (error) {
             
         } finally{
@@ -47,8 +46,25 @@ export function Gallery({header, similarityUrl, mainClass}: GalleryProps) {
         }
     }
 
-    //returns an array of object: { localUrl: ... }
-    const filterImages = (urls: Object[]) : PostImage[]=>{
+    const setFakePosts = (images: ImageData[]) : PostData[] => {
+        const newPosts = (images.map((image: ImageData) => (
+            {
+                image: image, 
+                song: localStorage.getItem('songData') ? JSON.parse(localStorage.getItem('songData') as string).lists[Math.random()* songLists.length] : null, 
+                owner: randomOwners[Math.floor(Math.random() * randomOwners.length)]
+            } as PostData
+        ))) as PostData[];
+
+        if (newPosts)
+            return [...embedPosts?? [],...newPosts];
+        else{
+            console.warn('error setting posts:', newPosts);
+            return [];
+        }
+    }
+
+    //ensures no duplicate images
+    const filterImages = (urls: Object[]) : ImageData[]=>{
 
         const set = new Set<string>();
 
@@ -61,7 +77,7 @@ export function Gallery({header, similarityUrl, mainClass}: GalleryProps) {
 
         return unique.map((item: any) => ({
             localUrl: item.imageUrl,
-        })) as PostImage[]
+        })) as ImageData[]
     }
 
     const fetchAny = async () => {
@@ -69,8 +85,9 @@ export function Gallery({header, similarityUrl, mainClass}: GalleryProps) {
             setIsLoading(true);
             const result = await axios.get("http://localhost:8000/image/fetch-any");
             const filtered = filterImages(result.data.results);
-            setImages(filtered);
-            // console.log("filtered", filtered);
+            // setPosts([...images, ...filtered]);
+            console.log(setFakePosts(filtered));
+            setPosts(setFakePosts(filtered));
         } catch (error) {
             console.error("Sample fetch error:", error);
         } finally{
@@ -79,7 +96,7 @@ export function Gallery({header, similarityUrl, mainClass}: GalleryProps) {
     };
 
     const renderImages = () => {
-        if (!images || images.length === 0) {
+        if (!posts || posts.length === (embedPosts?.length || 0)) {
             return (
             <>
                 {renderSkeletonColumn()}
@@ -88,19 +105,21 @@ export function Gallery({header, similarityUrl, mainClass}: GalleryProps) {
             );
     }
 
-    const mid = Math.ceil(images.length / 2);
-    const left = images.slice(0, mid);
-    const right = images.slice(mid);
+    const mid = Math.ceil(posts.length / 2);
+    const left = posts.slice(0, mid);
+    const right = posts.slice(mid);
 
-    const renderColumn = (col: typeof images) => (
+    const renderColumn = (col: typeof posts) => (
         <div className="grid gap-4 h-[fit-content]">
-        {col.map((image, index) => (
-            <div key={`${image.localUrl}-${index}`}>
-            <img
-                className="h-auto max-w-full rounded-lg object-cover object-center gallery-images"
-                src={image.localUrl}
-                alt="gallery-photo"
-            />
+        {col.map((post, index) => (
+            <div
+            className="relative"   
+            key={`${post.owner}-${index}`}>
+                <img
+                    className="h-auto max-w-full rounded-lg object-cover object-center gallery-images"
+                    src={post.image.storedUrl || post.image.localUrl}
+                    alt="gallery-photo"
+                />
             </div>
         ))}
         </div>
@@ -117,7 +136,7 @@ export function Gallery({header, similarityUrl, mainClass}: GalleryProps) {
     const renderSkeletonColumn = (items = 4) => (
         <div className="grid gap-4 h-[fit-content]">
             {Array.from({ length: items }).map((_, i) => {
-            const h = i % 2 === 0 ? 200 : 230; // 200px or 230px
+            const h = Math.random() < 0.5 ? 200 : 230; // Randomly choose between 200px and 230px
             return (
                 <div
                 key={i}

@@ -72,6 +72,7 @@ function PostUpload({image, setImage}: PostUploadProps) {
         //call delete api
     }
 
+
     return (
         <div className={`upload-wrapper flex flex-col items-center rounded-2xl ${image && 'relative hover:bg-black'} ${!image ? 'upload-shadow-animate' : ''} ${image && 'relative hover:bg-black'}`}>
             
