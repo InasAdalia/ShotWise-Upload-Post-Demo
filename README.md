@@ -22,3 +22,35 @@ This repo demonstrates:
 
 
   Usage of the above api's/libraries can be found in '/server' directory.
+
+## /Client
+
+This frontend can be locally hosted or accessed via website: (https://shotwise-upload-demo.netlify.app/)
+
+## /Server
+
+However, frontend only works with a server that must be locally hosted with '.env' files.
+
+'.env' files are sensitive and are not uploaded into github, only shared for lecturers/team members in Assignment document
+
+p/s: server could not be hosted due to Pinecone operations being too expensive for free hosting services
+
+
+## How to locally host
+
+clone this repo or download the project, and move the .env file into the server directory.
+
+_OR_
+
+download only the server directory, and move .env file into this directory.
+
+**client/frontend:**
+
+1. open terminal and direct to client folder using ' cd client '
+2. run ' npm run dev ' and localhost: XXXX link will be given. click to access it
+
+**server/backend:**
+
+1. open terminal and direct to server folder using ' cd server ' or ' ' cd ../server '
+2. run ' npm run dev ' and frontend can now access localhost:8000.
+3. to test, open localhost:8000/test or test if frontend works normally now
