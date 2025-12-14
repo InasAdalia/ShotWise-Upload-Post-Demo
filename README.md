@@ -21,11 +21,15 @@ This repo demonstrates:
   Images are stored, fetched and displayed from Supabase storage via its public Url.
 
 
-  Usage of the above api's/libraries can be found in '/server' directory.
+  Usage of the above api's libraries can be found in '/server' directory.
+
+
+
 
 ## /Client
 
 This frontend can be locally hosted or accessed via website: (https://shotwise-upload-demo.netlify.app/)
+
 
 ## /Server
 
@@ -44,7 +48,13 @@ _OR_
 
 download only the server directory, and move .env file into this directory.
 
+then:
+
 **client/frontend:**
+
+1. open website link (https://shotwise-upload-demo.netlify.app/) and later 'enable access to local server' if asked by browser.
+
+OR
 
 1. open terminal and direct to client folder using ' cd client '
 2. run ' npm run dev ' and localhost: XXXX link will be given. click to access it

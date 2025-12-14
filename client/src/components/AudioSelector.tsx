@@ -3,8 +3,10 @@ import { Icon } from '@iconify/react'
 import React, { useEffect } from 'react'
 import { songLists, type SongData } from '../data';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import { useSongManager } from '../SongContext';
+import { useSongManager } from '../context/SongContext';
 
+
+// album cover can be fetched using spotify api, but this project uses static images
 export const matchAlbumCovers = (songTitle: string, index: number) : string =>{
 
     const title = songLists.find(song =>
@@ -101,13 +103,15 @@ function AudioSelector({ selectedSong, onSelectSong, onClose }: AudioSelectorPro
                     <p className="text-xs font-normal text-ellipsis whitespace-nowrap overflow-hidden max-w-[200px]">{song.albumName}</p>
                 </div>
 
-                {/* PLAY/DELETE ICON */}
                 {selectedSong?.title === song.title ? (
+                    /* DELETE ICON if song is selected */
                     <Icon 
                         icon="mdi:trash-can-outline" height="18" width="18"
                         onClick={(e) => { e.stopPropagation(); toggleSongSelection(song); }}
                         className="text-gray-500 hover:text-rose-600 mr-2 cursor-pointer" />
                 ) : ( 
+
+                    /* PLAY ICON if song is not selected */
                     <span
                         onClick={(e) => {e.stopPropagation(); song && togglePlay(song); }} 
                         className="clear-left rounded-full bg-[#eff0f9] h-10 w-10 cursor-pointer flex items-center justify-center group">
@@ -138,7 +142,7 @@ function AudioSelector({ selectedSong, onSelectSong, onClose }: AudioSelectorPro
             {/* background blurrer */}
             <div className="fixed inset-x-0 -inset-y-20 z-0 h-[120vh] pointer-events-none" style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}></div>
             
-            {/* main component */}
+            {/* main component: popup modal from bottom of screen */}
             <div className="fixed h-[100%] top-52 left-0 right-0 flex justify-center">
                 <div className="w-full max-w-[375px] min-h-[430px] z-999 bg-gray-100 shadow-xl rounded-t-2xl px-4 py-2 max-h-[60vh] flex flex-col items-center overflow-y-auto scrollbar-hide">
                     {/* header */}

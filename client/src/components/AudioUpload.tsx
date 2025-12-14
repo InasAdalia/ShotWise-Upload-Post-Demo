@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import AudioSelector, { matchAlbumCovers } from './AudioSelector';
 import type { SongData } from '../data';
 import { useLocation } from 'react-router-dom';
-import { useSongManager } from '../SongContext';
+import { useSongManager } from '../context/SongContext';
 
 interface AudioUploadProps {
     enabled: boolean;
@@ -28,28 +28,13 @@ function AudioUpload({ selectedSong, onSelectSong, enabled }: AudioUploadProps) 
         }
     }, [location.pathname]);
 
-    useEffect(() => {
-        if (selectedSong) {
-            
-        }
-    }, [selectedSong]);
-
-    // const togglePlay = async () => {
-    //     if (!selectedSong?.previewUrl) return;
-        
-    //     console.log('yo')
-        
-    //     // 🔑 ENABLE playback first
-    //     togglePlaybackEnabled();
-
-    //     console.log('hu')
-
-    //     // Then play
-    //     await playSong(selectedSong);
-    // };
+    // re-render/update UI when selected song changes
+    useEffect(() => {}, [selectedSong]);
 
     const renderSelectedSong = () => {
         return selectedSong ? (
+
+            // if song selected display selected song
             <div
                 onClick={() => { setShowSelector(!showSelector) }}
                 className={`glassy-bg cursor-pointer hover:bg-gray hover:text-white h-[fit-content] w-auto max-w-50 flex gap-1 justify-center items-center px-2 py-1 relative max-h-40 shadow-lg rounded-xl`}>
@@ -91,22 +76,29 @@ function AudioUpload({ selectedSong, onSelectSong, enabled }: AudioUploadProps) 
                 </span>
             </div>
         ) : (
+
+            // if no song selected display button as '🎵 Add sound'
             <div
                 onClick={() => { enabled && setShowSelector(!showSelector) }} 
                 className={`glassy-bg ${enabled ? 'cursor-pointer' : 'cursor-default text-gray-500'} max-w-50 h-auto w-auto flex px-3 gap-3 justify-center items-space-between px-2 py-1 relative max-h-40 shadow-lg rounded-xl`}>
                 <Icon 
                     icon="mdi:music" height="20" width="20" 
                 />
-                <p className="text-ellipsis text-sm text-center self-center whitespace-nowrap overflow-hidden max-w-[200px]">Add Sound</p>
+                <p className="text-ellipsis text-sm text-center self-center whitespace-nowrap overflow-hidden max-w-[200px]">
+                    Add Sound
+                </p>
             </div>
         )
     }
 
     return (
-        <>
+        <>  
+            {/* one song choice displayed at header */}
             <div className="flex justify-center items-center w-full">
                 {renderSelectedSong()}
             </div>
+
+            {/* song selection modal popping up from bottom of screen */}
             {showSelector && (
                 <AudioSelector 
                     onClose={() => { setShowSelector(false) }} 

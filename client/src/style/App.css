@@ -1,7 +1,7 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 !important;
   text-align: center;
 }
 
@@ -11,18 +11,8 @@
   font-style: normal;
 }
 
-.glassy-button{
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  height: 32px;
-
-  background: rgba(0, 0, 0, 0.001);
-  /* color: #1e1e1e; */
-  border-radius: 23px;
-  cursor: pointer;
+.normal-box{
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
 .glassy-medium{
@@ -30,7 +20,7 @@
   background-color: rgba(255, 255, 255, 0.12); /* Example: 12% white opacity */
 
   /* 2. Apply the backdrop blur (Figma Background blur) */
-  backdrop-filter: blur(10px); /* Adjust blur amount as in Figma (e.g., 10px-15px) */
+  backdrop-filter: blur(10px); 
   -webkit-backdrop-filter: blur(10px); /* For Safari support */
 
   /* 3. Add a subtle border (Figma Stroke) */
@@ -43,36 +33,22 @@
   border-radius: 16px;
 
 }
-
 .glassy-medium.selected, .song-selection:hover{
   /* 1. Set a semi-transparent background color (Figma Fill) */
-  background-color: rgba(205, 229, 245, 0.12); /* Example: 12% white opacity */
+  background-color: rgba(205, 229, 245, 0.12); 
   border: 1px solid rgba(255, 255, 255, 0.25);
+
   /* 2. Apply the backdrop blur (Figma Background blur) */
-  backdrop-filter: blur(10px); /* Adjust blur amount as in Figma (e.g., 10px-15px) */
+  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px); /* For Safari support */
   box-shadow: 0 6px 6px rgba(107, 119, 232, 0.068), 0 0 20px rgba(125, 125, 189, 0.634);
-
-  /* 3. Add a subtle border (Figma Stroke) */
 }
-
-.selected .song-title{
-  color: #301e4a;
-}
-
 .glassy-bg{
-  /* background: rgba(0, 0, 0, 0.001); */
-  /* background: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.3); */
-
   border-radius: 16px;
   isolation: isolate;
   background-color: rgb(255 255 255 / 25%);
   text-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+  
   box-shadow: 0 6px 6px rgb(0 0 0 / 20%), 0 0 20px rgb(0 0 0 / 10%);
   text-align: center;
   
@@ -88,12 +64,26 @@
   }
 }
 
+.glassy-button{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+
+  background: rgba(0, 0, 0, 0.001);
+  /* color: #1e1e1e; */
+  border-radius: 23px;
+  cursor: pointer;
+}
 .glassy-button:hover{
   background: rgba(0, 0, 0, 0.05);
 }
 
-/* Rectangle 46 */
-
+.selected .song-title{
+  color: #301e4a;
+}
 
 .upload-img{
   /* Thumb nail */
@@ -106,15 +96,6 @@
   -webkit-backdrop-filter: blur(5px);
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
-
-.glassy-box{
-
-}
-
-.normal-box{
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-}
-
 .upload-bg{
   /* bg */
   overflow: hidden;
@@ -157,6 +138,10 @@
   filter: drop-shadow(0px 60px 60px rgb(255, 255, 255));
 }
 
+.upload-shadow-animate {
+  animation: uploadShadowPulse 3s ease-in-out infinite;
+}
+
 @keyframes uploadShadowPulse {
   0% {
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.025);
@@ -168,11 +153,6 @@
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.049);
   }
 }
-
-.upload-shadow-animate {
-  animation: uploadShadowPulse 3s ease-in-out infinite;
-}
-
 /* App.css or a globals file */
 .skeleton-box {
   border: 1px solid rgba(255, 255, 255, 0.25); /* Example: 25% white opacity */

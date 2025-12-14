@@ -1,13 +1,14 @@
 import axios from 'axios';
-import './App.css'
-import { LoadingProvider } from './LoadingContext'
+import './style/App.css'
+import { LoadingProvider } from './context/LoadingContext'
 import { imageDataset } from './data';
 import {router} from './Router'
 import { RouterProvider } from 'react-router-dom';
-import { SongManagerProvider } from './SongContext';
+import { SongManagerProvider } from './context/SongContext';
 
 function App() {
 
+  // to setup Pinecone storage with more images
   const bulkUploadAndIndex = async () => {
     try {
 
@@ -18,7 +19,6 @@ function App() {
       console.error('Bulk upload error:', err);
     }
   };
-  
   const uploadImage = async (imageName: string, imageUrl: string) => {
     try {
         console.log('Uploading and indexing image into Pinecone...');
@@ -29,7 +29,6 @@ function App() {
         });
         // console.log('✅ Upload complete:', result.data);
         // console.log('Public URL:', result.data.publicUrl);
-
         return result.data;
 
     } catch (err) {
@@ -43,6 +42,8 @@ function App() {
         {/* effects & bg */}
             <div className="gradient-bottom-back"/>
             <div className="gradient-bottom-front"/>
+
+        {/* main component */}
         <LoadingProvider>
           <SongManagerProvider> 
             <RouterProvider router={router} />

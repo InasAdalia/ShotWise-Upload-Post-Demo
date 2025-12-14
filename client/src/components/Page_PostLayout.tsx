@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Gallery } from './Gallery'
+import { Gallery } from './PostGrid'
 import PostUpload from './PostUpload'
 import AudioUpload from './AudioUpload';
 import { Icon } from '@iconify/react';
 import type { SongData, ImageData, PostData } from '../data';
 import { useNavigate } from 'react-router-dom';
-import { useSongManager } from '../SongContext';
+import { useSongManager } from '../context/SongContext';
 
 
 

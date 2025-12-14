@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { PostData } from '../data';
-import { Gallery } from './Gallery'
+import { Gallery } from './PostGrid'
 import Menu from './Menu'
 
 function FeedLayout() {

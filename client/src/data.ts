@@ -1,5 +1,4 @@
-
-
+//songs to be fetched as pre-cached for smoother demo
 export const songLists=[
     {title: 'Strategy', artist: 'Twice', limit:1},
     {title: 'Psycho', artist: 'Red Velvet', limit:1},
@@ -9,7 +8,7 @@ export const songLists=[
     {title: 'vampire', artist: 'Olivia Rodrigo', limit:1}
 ]
 
-
+// interface is based on results from spotifyPreviewFinder
 export interface SongData{
     title: string,
     artist: string,
@@ -20,19 +19,22 @@ export interface SongData{
     popularity: string,
 }
 
+// this is based on uploaded image when making a post.
 export interface ImageData{
     localUrl: string, 
-    storedUrl?: string, 
-    storedName?: string, 
+    storedUrl?: string, // supabase public Url of the image
+    storedName?: string, // name stored in supabase (not important for now)
     imageFile?: File //need to be available only for uploading into supabase
 }
 
+// a post basically contains user, imageData and songData
 export interface PostData{
     image: ImageData,
     song: SongData | null,
     owner? : string
 }
 
+// will be assigned to posts
 export const randomOwners =[
     'inasi_ayam',
     'spoons',
@@ -41,6 +43,7 @@ export const randomOwners =[
     'jaredjagreenjablue'
 ]
 
+// for dev setup mode only: used for bulk uploading into Pinecone
 export const imageDataset=[
     'https://i.pinimg.com/736x/66/1c/7e/661c7ededd4564d0fabe6cb24e5caa13.jpg',
     'https://i.pinimg.com/736x/45/f5/b3/45f5b317fd3812f570e735ca441e27c0.jpg',

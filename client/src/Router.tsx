@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
-import FeedLayout from "./components/FeedLayout";
-import PostLayout from "./components/PostLayout";
+import FeedLayout from "./components/Page_FeedLayout";
+import PostLayout from "./components/Page_PostLayout";
 
 export const router = createBrowserRouter([
     {path: '/', element: <FeedLayout />},

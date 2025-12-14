@@ -1,4 +1,6 @@
 // File: server\utils\imageEmbedder.js
+
+// Pinecone only stores embeddings. Xenova can generate embeddings from images
 const { pipeline, RawImage } = require('@xenova/transformers');
 
 class ImageEmbedder {

@@ -1,6 +1,6 @@
 // File: client/src/SongManager.tsx
 import { useEffect, useRef, useState, createContext, useContext, type ReactNode } from 'react';
-import { songLists, type SongData } from './data';
+import { songLists, type SongData } from '../data';
 import axios from 'axios';
 import { useLoading } from './LoadingContext';
 

@@ -1,23 +1,14 @@
-
-const { Pinecone: PineconeClient } = require('@pinecone-database/pinecone');
-
-
-const axios = require('axios');
+const axios = require('axios'); //for http requests
 const express = require('express');
 const app = express();
 app.use(express.json());
 
-const dotenv = require('dotenv');
-const cors = require('cors');
-const spotifyPreviewFinder = require('spotify-preview-finder');
+//this is for .env where secrets are stored.
+const dotenv = require('dotenv'); 
 dotenv.config();
 
-
-const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage() });
-// const spotifyPreviewFinder = await import('spotify-preview-finder').then(mod => mod.default);
-
 // CORS setup
+const cors = require('cors'); // cors are for cross-origin resource sharing
 const corsOptions = {
   origin: '*',
   credentials: true,
@@ -30,12 +21,38 @@ const clientId = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
 
-// Default route
+// test endpoint
 app.get("/test", (req, res) => {
   res.json({ fruits: ["apple", "banana", "orange"] });
 });
 
-// 1. Spotify: get Spotify token
+/*  ------------------------------------- 1. SUPABASE ENDPOINTS--------------------------------- */
+const { createClient } = require('@supabase/supabase-js');
+const imageUrl = 'https://xlpwosvjzyffqmiicqpf.supabase.co'
+const supabaseKey = process.env.SUPABASE_KEY
+const supabase = createClient(imageUrl, supabaseKey)
+const BUCKET = 'gallery-images';
+
+// 1. Upload image to Supabase
+app.post('/supabase/fetch', async (req, res) => {
+    try {
+      const { data } = supabase
+      .storage
+      .from(BUCKET)
+      .getPublicUrl('mine_2023.jpg')
+
+      res.json(data)
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+})
+
+
+/*  ------------------------------------- 2. SPOTIFY ENDPOINTS--------------------------------- */
+ //extra library to access music previews since spotify api has removed them
+const spotifyPreviewFinder = require('spotify-preview-finder');
+
+// 1. get Spotify token
 async function getSpotifyToken() {
   const tokenUrl = "https://accounts.spotify.com/api/token";
 
@@ -56,43 +73,7 @@ async function getSpotifyToken() {
   return response.data.access_token;
 }
 
-//2. Spotify: search for tracks
-app.get("/music/search", async (req, res)=>{
-    try {
-        // const {title, artist, limit} = req.query;
-
-        // if (!q) return res.status(400).json({ error: 'Query parameter "q" required' });
-
-        // Search by song name only (limit is optional, default is 5)
-        const result = await spotifyPreviewFinder('Strategy', 'twice', 1);
-    
-        if (result.success) {
-            res.json(result);
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-})
-
-//3. To play the audio preview from spotify
-app.get('/music/proxy-preview', async (req, res) => {
-  try {
-    const { url } = req.query;
-      if (!url) return res.status(400).send("URL required");
-
-    const response = await axios.get(url, {
-      responseType: 'arraybuffer'
-    });
-    
-    console.log(response)
-    res.setHeader('Content-Type', 'audio/mpeg');
-    res.send(response.data);
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-});
-
-//Spotify: bulk fetch songs by titles
+//2. bulk fetch songs by titles using spotifyPreviewFinder
 app.post('/music/bulk-search', async (req, res) => {
   try { 
     const searches = req.body; // [{ title, artist, limit }, ...]
@@ -132,29 +113,29 @@ app.post('/music/bulk-search', async (req, res) => {
   }
 });
 
-// Spotify: get ONE specific track
-app.get("/music/test-song", async (req, res) => {
+//3. To play the audio preview from spotify
+app.get('/music/proxy-preview', async (req, res) => {
   try {
-    const token = await getSpotifyToken();
+    const { url } = req.query;
+      if (!url) return res.status(400).send("URL required");
 
-    const response = await axios.get(
-      "https://api.spotify.com/v1/tracks/7lPN2DXiMsVn7XUKtOW1CS",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-
-    res.json(response.data);  // return the track object
+    const response = await axios.get(url, {
+      responseType: 'arraybuffer'
+    });
+    
+    console.log(response)
+    res.setHeader('Content-Type', 'audio/mpeg');
+    res.send(response.data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).send(err.message);
   }
 });
 
-//PINECONE STUFF
-const { index } = require('./Pinecone');
-const imageEmbedder = require('./ImageEmbedder');
+/* ------------------------------------- 3. PINECONE ENDPOINTS--------------------------------- */
+const { index } = require('./Pinecone'); //index is the 'bucket' of our embeddings storage
+const imageEmbedder = require('./ImageEmbedder'); //imageEmbedder is the class that generates embeddings
 
-// ============= UPLOAD & INDEX IMAGE =============
+// 1. Extract embedding and upload into Pinecone
 app.post('/image/upload-and-index', async (req, res) => {
   try {
     const { imageName, imageUrl } = req.body;
@@ -165,7 +146,7 @@ app.post('/image/upload-and-index', async (req, res) => {
     const embedding = await imageEmbedder.embedImage(imageUrl);
     console.log('Embedding dimensions:', embedding.length);
 
-    // 2. Store in Pinecone with metadata
+    // 2. Store in Pinecone with metadata OR 'indexing' in Pinecone
     console.log('Step 2: Storing in Pinecone...');
     await index.namespace('default').upsert([
       {
@@ -193,7 +174,7 @@ app.post('/image/upload-and-index', async (req, res) => {
   }
 });
 
-// ============= GET ANY 10 IMAGE URLS =============
+// 2. fetch any 10 random image urls from Pinecone
 app.get('/image/fetch-any', async (req, res) => {
   try {
     // Build a random vector with same dimension as your embeddings (e.g. 512)
@@ -221,7 +202,7 @@ app.get('/image/fetch-any', async (req, res) => {
   }
 });
 
-// ============= SEARCH SIMILAR IMAGES =============
+// 3. Search for top 10 most similar images
 app.post('/image/similarity-search', async (req, res) => {
   try {
     const { imageUrl, topK = 10 } = req.body;
@@ -258,26 +239,7 @@ app.post('/image/similarity-search', async (req, res) => {
   }
 });
 
-// ============= DELETE IMAGE FROM INDEX =============
-app.post('/image/delete-from-index', async (req, res) => {
-  try {
-    const { imageName } = req.body;
-
-    await index.namespace('default').deleteOne(imageName);
-
-    console.log('Image deleted from index:', imageName);
-    res.json({
-      success: true,
-      message: 'Image deleted from index',
-    });
-
-  } catch (error) {
-    console.error('Delete error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// ============= LIST ALL INDEXED IMAGES =============
+// test: list down all indexed images
 app.get('/image/list-indexed', async (req, res) => {
   try {
     // Note: Pinecone doesn't have a built-in list all function
@@ -291,7 +253,7 @@ app.get('/image/list-indexed', async (req, res) => {
 });
 
 
-// ============= BULK UPLOAD & INDEX IMAGES =============
+// for Pinecone storage setup only: bulk upload & index images
 app.post('/image/bulk-upload-and-index', async (req, res) => {
   try {
     const { images } = req.body; // array of image URLs
@@ -339,24 +301,3 @@ app.post('/image/bulk-upload-and-index', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-
-// -------------------- SUPABASE STUFF --------
-const { createClient } = require('@supabase/supabase-js');
-const imageUrl = 'https://xlpwosvjzyffqmiicqpf.supabase.co'
-const supabaseKey = process.env.SUPABASE_KEY
-const supabase = createClient(imageUrl, supabaseKey)
-const BUCKET = 'gallery-images';
-
-app.post('/supabase/fetch', async (req, res) => {
-    try {
-      const { data } = supabase
-      .storage
-      .from(BUCKET)
-      .getPublicUrl('mine_2023.jpg')
-
-      res.json(data)
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-})
