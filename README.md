@@ -3,6 +3,9 @@ ShotWise is an app that uses AI to help users take photos with right composure, 
 While attempting shots users will see real-time inspirations popping up tailored based on their subject, or users can just explore more in the Feed page.
 
 ## Demo
+
+https://github.com/user-attachments/assets/07f389b4-b65d-4923-90be-fd8b1827a627
+
 This repo demonstrates:
 1. **Visual technique**
 
@@ -41,6 +44,7 @@ p/s: server could not be hosted due to Pinecone operations being too expensive f
 
 
 ## How to locally host
+
 
 clone this repo or download the project, and move the .env file into the server directory.
 
